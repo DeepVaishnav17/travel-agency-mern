@@ -47,7 +47,7 @@ const Footer = () => {
       
       {/* Copyright */}
       <div className="text-center text-gray-600 mt-12 border-t border-gray-800 pt-6">
-        © {new Date().getFullYear()} Wanderlust Travels. All rights reserved.
+        © {new Date().getFullYear()} Deep tours & Travels. All rights reserved.
       </div>
     </footer>
   );

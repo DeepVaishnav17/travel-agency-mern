@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom'; // ✅ Added useLocation
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 
@@ -7,16 +7,27 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ Hook to access the "return address" passed from TourDetails
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const { data } = await api.post('/auth/register', { name, email, password });
+      
+      // Save credentials
       localStorage.setItem('userInfo', JSON.stringify(data));
       localStorage.setItem('token', data.token);
-      toast.success('Account Created!');
-      navigate('/');
+      
+      toast.success('Account Created! Welcome.');
+
+      // 🧠 SMART REDIRECT LOGIC
+      // Check if there is a specific return address (like a Tour Page)
+      // If yes, go there. If no, go Home.
+      const origin = location.state?.from?.pathname || '/';
+      navigate(origin);
+
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed');
     }
@@ -62,7 +73,8 @@ const Register = () => {
           </button>
         </form>
         <p className="text-center mt-4 text-gray-600">
-          Already have an account? <Link to="/login" className="text-primary font-bold">Login</Link>
+          {/* ✅ Pass the 'from' state to Login page too, in case they switch flow */}
+          Already have an account? <Link to="/login" state={{ from: location.state?.from }} className="text-primary font-bold">Login</Link>
         </p>
       </div>
     </div>
