@@ -2,18 +2,14 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// ✅ FIX: Use Port 587 with 'rejectUnauthorized: false' to bypass timeouts
+// ✅ FIX: Force IPv4 and use Gmail Service (Best for Render)
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,       // Use Standard TLS port
-  secure: false,   // Must be false for port 587
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  tls: {
-    rejectUnauthorized: false // ✅ This bypasses the certificate error causing the timeout
-  }
+  family: 4 // ✅ FORCE IPv4: This prevents the connection timeout!
 });
 
 // 1. Send Booking Confirmation to CUSTOMER
