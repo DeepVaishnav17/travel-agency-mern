@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom'; // ✅ Added for redirect
-import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaVideo, FaCalendarDay, FaArchive, FaUndo } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaVideo, FaCalendarDay, FaArchive, FaUndo, FaUser, FaStar } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('tours');
+  
+  // Data States
   const [tours, setTours] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]); 
+  const [users, setUsers] = useState([]);     // ✅ NEW
+  const [reviews, setReviews] = useState([]); // ✅ NEW
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -21,46 +25,32 @@ const AdminDashboard = () => {
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // 1. ✅ PROTECT THE ROUTE (Redirect if not Admin)
+  // 1. Protect Route
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
     if (!userInfo || userInfo.role !== 'admin') {
         toast.error("Access Denied: Admins Only");
-        navigate('/'); // Send them home
+        navigate('/'); 
     }
   }, [navigate]);
 
+  // 2. Data Fetching based on Tab
   useEffect(() => {
     if (activeTab === 'tours') fetchTours();
     else if (activeTab === 'bookings') fetchBookings();
     else if (activeTab === 'messages') fetchContacts(); 
+    else if (activeTab === 'users') fetchUsers();     // ✅ NEW
+    else if (activeTab === 'reviews') fetchReviews(); // ✅ NEW
   }, [activeTab]);
 
-  // 2. ✅ SAFE FETCHING (Prevents ".map is not a function" crash)
-  const fetchTours = async () => {
-    try { 
-        const { data } = await api.get('/tours'); 
-        setTours(Array.isArray(data) ? data : []); 
-    } catch (error) { console.error("Failed to fetch tours"); }
-  };
-
-  const fetchBookings = async () => {
-    try { 
-        const { data } = await api.get('/bookings'); 
-        // Only set if it's an array, otherwise empty list
-        setBookings(Array.isArray(data) ? data : []); 
-    } catch (error) { 
-        console.error(error);
-        // Don't show toast on 404/401 to keep UI clean, just log it
-    }
-  };
-
-  const fetchContacts = async () => {
-    try { 
-        const { data } = await api.get('/contact'); 
-        setContacts(Array.isArray(data) ? data : []); 
-    } catch (error) { console.error(error); }
-  };
+  // --- API CALLS ---
+  const fetchTours = async () => { try { const { data } = await api.get('/tours'); setTours(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
+  const fetchBookings = async () => { try { const { data } = await api.get('/bookings'); setBookings(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
+  const fetchContacts = async () => { try { const { data } = await api.get('/contact'); setContacts(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
+  
+  // ✅ NEW FETCH FUNCTIONS
+  const fetchUsers = async () => { try { const { data } = await api.get('/auth/users'); setUsers(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
+  const fetchReviews = async () => { try { const { data } = await api.get('/reviews'); setReviews(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
 
   // --- IMAGE UPLOAD ---
   const uploadImage = async (file) => {
@@ -73,43 +63,23 @@ const AdminDashboard = () => {
   const handleMainImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    try {
-        const url = await uploadImage(file);
-        setFormData({ ...formData, mainImage: url });
-        toast.success('Main Image Uploaded');
-    } catch (err) { toast.error('Upload failed'); }
+    try { const url = await uploadImage(file); setFormData({ ...formData, mainImage: url }); toast.success('Image Uploaded'); } catch (err) { toast.error('Upload failed'); }
   };
 
-  // --- EDIT & ARCHIVE LOGIC ---
+  // --- MANAGE TOURS ---
   const handleEditClick = (tour) => {
     setEditingId(tour._id);
-    setFormData({
-        ...tour,
-        inclusions: tour.inclusions ? tour.inclusions.join(', ') : '',
-        exclusions: tour.exclusions ? tour.exclusions.join(', ') : '',
-        timeline: tour.timeline || [],
-        reviews: tour.reviews || []
-    });
+    setFormData({ ...tour, inclusions: tour.inclusions?.join(', '), exclusions: tour.exclusions?.join(', '), timeline: tour.timeline || [], reviews: tour.reviews || [] });
     setShowAddForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleArchiveToggle = async (tour) => {
-    try {
-        const newStatus = !tour.isArchived;
-        await api.put(`/tours/${tour._id}`, { isArchived: newStatus });
-        toast.success(newStatus ? 'Tour Archived' : 'Tour Unarchived');
-        fetchTours();
-    } catch (error) { toast.error('Failed to update status'); }
+    try { await api.put(`/tours/${tour._id}`, { isArchived: !tour.isArchived }); toast.success('Status Updated'); fetchTours(); } catch (error) { toast.error('Failed'); }
   };
 
-  const cancelEdit = () => {
-    setShowAddForm(false);
-    setEditingId(null);
-    setFormData(initialFormState);
-  };
+  const cancelEdit = () => { setShowAddForm(false); setEditingId(null); setFormData(initialFormState); };
 
-  // --- SUBMIT LOGIC ---
   const handleSubmitTour = async (e) => {
     e.preventDefault();
     try {
@@ -118,31 +88,23 @@ const AdminDashboard = () => {
       if (typeof finalData.exclusions === 'string') finalData.exclusions = finalData.exclusions.split(',').map(i => i.trim());
       if (!finalData.mainImage) finalData.mainImage = "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop";
 
-      if (editingId) {
-        await api.put(`/tours/${editingId}`, finalData);
-        toast.success('Tour Updated!');
-      } else {
-        await api.post('/tours', finalData);
-        toast.success('Tour Created!');
-      }
-      cancelEdit(); 
-      fetchTours();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed');
-    }
+      if (editingId) { await api.put(`/tours/${editingId}`, finalData); toast.success('Tour Updated!'); } 
+      else { await api.post('/tours', finalData); toast.success('Tour Created!'); }
+      cancelEdit(); fetchTours();
+    } catch (error) { toast.error('Failed'); }
   };
 
-  const handleDeleteTour = async (id) => {
-    if(window.confirm('Delete this tour permanently?')) {
-        await api.delete(`/tours/${id}`);
-        fetchTours();
-        toast.info('Tour Deleted');
-    }
-  };
-
+  const handleDeleteTour = async (id) => { if(window.confirm('Delete this tour?')) { await api.delete(`/tours/${id}`); fetchTours(); toast.info('Deleted'); } };
   const handleStatusChange = async (id, status) => { await api.put(`/bookings/${id}`, { status }); fetchBookings(); toast.success(`Marked as ${status}`); };
 
-  // Helper Logic
+  // --- NEW: DELETE REVIEW ---
+  const handleDeleteReview = async (id) => {
+    if(window.confirm('Remove this review permanently?')) {
+        try { await api.delete(`/reviews/${id}`); fetchReviews(); toast.success('Review Removed'); } catch(err) { toast.error('Failed'); }
+    }
+  };
+
+  // Helper Logic for Tour Form
   const addDay = () => setFormData({...formData, timeline: [...formData.timeline, { day: formData.timeline.length + 1, title: '', desc: '', image: '' }]});
   const updateDay = (i, f, v) => { const n = [...formData.timeline]; n[i][f] = v; setFormData({...formData, timeline: n}); };
   const removeDay = (i) => { const n = formData.timeline.filter((_, idx) => idx !== i).map((item, idx) => ({...item, day: idx+1})); setFormData({...formData, timeline: n}); };
@@ -155,12 +117,20 @@ const AdminDashboard = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
 
+      {/* ✅ UPDATED TABS */}
       <div className="flex gap-6 border-b mb-8 overflow-x-auto">
-        <button className={`pb-2 px-2 text-lg font-medium whitespace-nowrap ${activeTab === 'tours' ? 'border-b-4 border-primary text-primary' : 'text-gray-500'}`} onClick={() => setActiveTab('tours')}>Manage Tours</button>
-        <button className={`pb-2 px-2 text-lg font-medium whitespace-nowrap ${activeTab === 'bookings' ? 'border-b-4 border-primary text-primary' : 'text-gray-500'}`} onClick={() => setActiveTab('bookings')}>Bookings</button>
-        <button className={`pb-2 px-2 text-lg font-medium whitespace-nowrap ${activeTab === 'messages' ? 'border-b-4 border-primary text-primary' : 'text-gray-500'}`} onClick={() => setActiveTab('messages')}>Messages</button>
+        {['tours', 'bookings', 'messages', 'users', 'reviews'].map(tab => (
+            <button 
+                key={tab}
+                className={`pb-2 px-2 text-lg font-medium capitalize whitespace-nowrap ${activeTab === tab ? 'border-b-4 border-primary text-primary' : 'text-gray-500'}`} 
+                onClick={() => setActiveTab(tab)}
+            >
+                {tab}
+            </button>
+        ))}
       </div>
 
+      {/* --- TAB 1: TOURS --- */}
       {activeTab === 'tours' && (
         <div>
           <button onClick={() => { cancelEdit(); setShowAddForm(!showAddForm); }} className="bg-green-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 mb-6 font-semibold shadow-md">
@@ -244,6 +214,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* --- TAB 2: BOOKINGS --- */}
       {activeTab === 'bookings' && (
         <div className="bg-white rounded shadow overflow-hidden">
              <table className="w-full text-left">
@@ -264,7 +235,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* MESSAGES TAB CONTENT */}
+      {/* --- TAB 3: MESSAGES --- */}
       {activeTab === 'messages' && (
         <div className="bg-white rounded shadow overflow-hidden">
              <table className="w-full text-left">
@@ -289,6 +260,49 @@ const AdminDashboard = () => {
             </table>
         </div>
       )}
+
+      {/* --- TAB 4: USERS (✅ NEW) --- */}
+      {activeTab === 'users' && (
+        <div className="bg-white rounded shadow overflow-hidden">
+             <table className="w-full text-left">
+              <thead className="bg-gray-100"><tr><th className="p-4">Name</th><th className="p-4">Email</th><th className="p-4">Role</th><th className="p-4">Joined On</th></tr></thead>
+              <tbody>
+                {users.length > 0 ? users.map(u => (
+                  <tr key={u._id} className="border-b hover:bg-gray-50">
+                    <td className="p-4 font-bold flex items-center gap-2"><FaUser className="text-gray-400"/> {u.name}</td>
+                    <td className="p-4 text-gray-600">{u.email}</td>
+                    <td className="p-4"><span className={`px-2 py-1 rounded text-xs font-bold uppercase ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{u.role}</span></td>
+                    <td className="p-4 text-sm text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                )) : <tr><td colSpan="4" className="p-10 text-center text-gray-500">No users found.</td></tr>}
+              </tbody>
+            </table>
+        </div>
+      )}
+
+      {/* --- TAB 5: REVIEWS (✅ NEW) --- */}
+      {activeTab === 'reviews' && (
+        <div className="bg-white rounded shadow overflow-hidden">
+             <table className="w-full text-left">
+              <thead className="bg-gray-100"><tr><th className="p-4">User</th><th className="p-4">Rating</th><th className="p-4">Comment</th><th className="p-4">Action</th></tr></thead>
+              <tbody>
+                {reviews.length > 0 ? reviews.map(r => (
+                  <tr key={r._id} className="border-b hover:bg-gray-50">
+                    <td className="p-4 font-bold">{r.name}</td>
+                    <td className="p-4 flex text-yellow-500">{[...Array(r.rating)].map((_, i) => <FaStar key={i} size={14}/>)}</td>
+                    <td className="p-4 italic text-gray-600">"{r.comment}"</td>
+                    <td className="p-4">
+                        <button onClick={() => handleDeleteReview(r._id)} className="text-red-500 hover:text-red-700 flex items-center gap-1 font-bold text-xs border border-red-200 px-2 py-1 rounded hover:bg-red-50">
+                            <FaTrash /> Delete
+                        </button>
+                    </td>
+                  </tr>
+                )) : <tr><td colSpan="4" className="p-10 text-center text-gray-500">No reviews found.</td></tr>}
+              </tbody>
+            </table>
+        </div>
+      )}
+
     </div>
   );
 };

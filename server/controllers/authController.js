@@ -54,7 +54,6 @@ const loginUser = async (req, res) => {
 // @desc    Get current user data (Protected)
 // @route   GET /api/auth/me
 const getMe = async (req, res) => {
-  // req.user is set by the 'protect' middleware
   const user = {
     _id: req.user._id,
     name: req.user.name,
@@ -64,5 +63,16 @@ const getMe = async (req, res) => {
   res.status(200).json(user);
 };
 
-// ✅ Export all 3 functions
-module.exports = { registerUser, loginUser, getMe };
+// @desc    Get all users (Admin)
+// @route   GET /api/auth/users
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Export all 4 functions
+module.exports = { registerUser, loginUser, getMe, getAllUsers };
