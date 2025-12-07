@@ -34,6 +34,10 @@ app.use('/api/tours', require('./routes/tourRoutes'));
 app.use('/api/config', require('./routes/configRoutes')); // For Admin Banners
 // ... other imports
 app.use('/api/bookings', require('./routes/bookingRoutes'));
+// ... other imports
+//app.use('/api/users', require('./routes/userRoutes')); // Existing
+app.use('/api/reviews', require('./routes/reviewRoutes')); // ✅ ADD THIS
+// ...
 
 const PORT = process.env.PORT || 5000;
 

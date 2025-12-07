@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import TourCard from '../components/TourCard';
 import { Link } from 'react-router-dom';
+import Testimonials from '../components/Testimonials'; // ✅ Import This
 
 const Home = () => {
   const [tours, setTours] = useState([]);
@@ -71,6 +72,9 @@ const Home = () => {
           </Link>
         </div>
       </div>
+
+
+      <Testimonials />
     </div>
   );
 };
