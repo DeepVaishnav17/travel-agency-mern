@@ -11,33 +11,25 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const authRoutes = require('./routes/authRoutes');
-const tourRoutes = require('./routes/tourRoutes');
-const configRoutes = require('./routes/configRoutes');
-const uploadRoutes = require('./routes/uploadRoutes');
 
-// Middleware
-app.use(express.json());
-app.use(cors());
-app.use(helmet());
+// --- MIDDLEWARE ---
+app.use(express.json()); // Allows parsing JSON body
+app.use(cors());         // ✅ Enables CORS for Vercel/Mobile/All
+app.use(helmet());       // Adds security headers
 
-// Basic Route
+// --- BASIC ROUTE ---
 app.get('/', (req, res) => {
   res.send('Tours & Travels API is running...');
 });
-app.use('/api/contact', require('./routes/contactRoutes'));
 
-// Import Routes (We will create these in Phase 2)
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/tours', require('./routes/tourRoutes'));
-//app.use('/api/bookings', require('./routes/bookingRoutes'));
-app.use('/api/config', require('./routes/configRoutes')); // For Admin Banners
-// ... other imports
-app.use('/api/bookings', require('./routes/bookingRoutes'));
-// ... other imports
-//app.use('/api/users', require('./routes/userRoutes')); // Existing
-app.use('/api/reviews', require('./routes/reviewRoutes')); // ✅ ADD THIS
-// ...
+// --- API ROUTES ---
+app.use('/api/auth', require('./routes/authRoutes'));         // Login, Register, Users
+app.use('/api/tours', require('./routes/tourRoutes'));        // Tours (CRUD, Search)
+app.use('/api/bookings', require('./routes/bookingRoutes'));  // Bookings
+app.use('/api/contact', require('./routes/contactRoutes'));   // Contact Messages
+app.use('/api/reviews', require('./routes/reviewRoutes'));    // Reviews
+app.use('/api/config', require('./routes/configRoutes'));     // Admin Config
+app.use('/api/upload', require('./routes/uploadRoutes'));     // ✅ Image Uploads
 
 const PORT = process.env.PORT || 5000;
 
