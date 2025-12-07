@@ -2,8 +2,11 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config();
 
+// ✅ FIX: Use explicit Host and Port 465 (SSL) to avoid Render timeouts
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,        // Secure SSL port
+  secure: true,     // Must be true for port 465
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -54,7 +57,7 @@ const sendAdminBookingAlert = async (details) => {
   return transporter.sendMail(mailOptions);
 };
 
-// 3. Contact Email (Kept for backend safety, even if frontend form is removed)
+// 3. Contact Email
 const sendContactEmail = async (data) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
