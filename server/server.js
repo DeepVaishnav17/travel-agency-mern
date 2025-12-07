@@ -14,8 +14,20 @@ const app = express();
 
 // --- MIDDLEWARE ---
 app.use(express.json()); // Allows parsing JSON body
-app.use(cors());         // ✅ Enables CORS for Vercel/Mobile/All
 app.use(helmet());       // Adds security headers
+
+// ✅ FIX: CORS Configuration
+// We must explicitly list the domains allowed to access the backend
+app.use(cors({
+  origin: [
+    "https://travel-agency-mern-beta.vercel.app", // Your deployed Frontend (Vercel)
+    "http://localhost:5173",                      // Your local development (Vite)
+    "http://localhost:3000"                       // Backup local port
+  ],
+  credentials: true, // Allow cookies and authorization headers
+  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 // --- BASIC ROUTE ---
 app.get('/', (req, res) => {
