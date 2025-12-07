@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
-import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaVideo, FaCalendarDay, FaArchive, FaUndo, FaEnvelope } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom'; // ✅ Added for redirect
+import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaVideo, FaCalendarDay, FaArchive, FaUndo } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('tours');
   const [tours, setTours] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [contacts, setContacts] = useState([]); // ✅ NEW: Store for messages
+  const [contacts, setContacts] = useState([]); 
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const navigate = useNavigate();
 
   const initialFormState = {
     title: '', destination: '', price: '', duration: '', desc: '', mainImage: null,
@@ -19,23 +21,45 @@ const AdminDashboard = () => {
 
   const [formData, setFormData] = useState(initialFormState);
 
+  // 1. ✅ PROTECT THE ROUTE (Redirect if not Admin)
+  useEffect(() => {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    if (!userInfo || userInfo.role !== 'admin') {
+        toast.error("Access Denied: Admins Only");
+        navigate('/'); // Send them home
+    }
+  }, [navigate]);
+
   useEffect(() => {
     if (activeTab === 'tours') fetchTours();
     else if (activeTab === 'bookings') fetchBookings();
-    else if (activeTab === 'messages') fetchContacts(); // ✅ NEW: Fetch on tab switch
+    else if (activeTab === 'messages') fetchContacts(); 
   }, [activeTab]);
 
+  // 2. ✅ SAFE FETCHING (Prevents ".map is not a function" crash)
   const fetchTours = async () => {
-    try { const { data } = await api.get('/tours'); setTours(data); } catch (error) { console.error("Failed to fetch tours"); }
+    try { 
+        const { data } = await api.get('/tours'); 
+        setTours(Array.isArray(data) ? data : []); 
+    } catch (error) { console.error("Failed to fetch tours"); }
   };
 
   const fetchBookings = async () => {
-    try { const { data } = await api.get('/bookings'); setBookings(data); } catch (error) { toast.error('Failed to load bookings'); }
+    try { 
+        const { data } = await api.get('/bookings'); 
+        // Only set if it's an array, otherwise empty list
+        setBookings(Array.isArray(data) ? data : []); 
+    } catch (error) { 
+        console.error(error);
+        // Don't show toast on 404/401 to keep UI clean, just log it
+    }
   };
 
-  // ✅ NEW FUNCTION: Fetch Messages
   const fetchContacts = async () => {
-    try { const { data } = await api.get('/contact'); setContacts(data); } catch (error) { toast.error('Failed to load messages'); }
+    try { 
+        const { data } = await api.get('/contact'); 
+        setContacts(Array.isArray(data) ? data : []); 
+    } catch (error) { console.error(error); }
   };
 
   // --- IMAGE UPLOAD ---
@@ -131,7 +155,6 @@ const AdminDashboard = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
 
-      {/* ✅ UPDATED TABS SECTION */}
       <div className="flex gap-6 border-b mb-8 overflow-x-auto">
         <button className={`pb-2 px-2 text-lg font-medium whitespace-nowrap ${activeTab === 'tours' ? 'border-b-4 border-primary text-primary' : 'text-gray-500'}`} onClick={() => setActiveTab('tours')}>Manage Tours</button>
         <button className={`pb-2 px-2 text-lg font-medium whitespace-nowrap ${activeTab === 'bookings' ? 'border-b-4 border-primary text-primary' : 'text-gray-500'}`} onClick={() => setActiveTab('bookings')}>Bookings</button>
@@ -195,7 +218,7 @@ const AdminDashboard = () => {
                             <button type="button" onClick={() => removeReview(index)} className="text-red-500 p-2"><FaTrash /></button>
                         </div>
                     ))}
-                    <button type="button" onClick={addReview} className="bg-blue-100 text-blue-600 px-4 py-2 rounded font-bold text-sm">+ Add Review</button>
+                    <button type="button" onClick={addReview} className="bg-blue-100 text-blue-600 px-4 py-2 rounded font-bold text-sm hover:bg-blue-200">+ Add Review</button>
                 </div>
 
                 <button type="submit" className="bg-primary hover:bg-blue-600 text-white py-3 rounded-lg font-bold w-full shadow-md">{editingId ? 'Update Tour Package' : 'Create Tour Package'}</button>
@@ -226,7 +249,7 @@ const AdminDashboard = () => {
              <table className="w-full text-left">
               <thead className="bg-gray-100"><tr><th className="p-4">Customer</th><th className="p-4">Tour</th><th className="p-4">Status</th><th className="p-4">Actions</th></tr></thead>
               <tbody>
-                {bookings.map(b => (
+                {bookings.length > 0 ? bookings.map(b => (
                   <tr key={b._id} className="border-b hover:bg-gray-50">
                     <td className="p-4">{b.fullName}<br/><span className="text-xs text-gray-500">{b.email}</span></td>
                     <td className="p-4">{b.tour?.title || 'Unknown Tour'}</td>
@@ -235,19 +258,19 @@ const AdminDashboard = () => {
                         {b.status === 'pending' && (<><button onClick={() => handleStatusChange(b._id, 'approved')} className="text-green-500"><FaCheck /></button><button onClick={() => handleStatusChange(b._id, 'cancelled')} className="text-red-500"><FaTimes /></button></>)}
                     </td>
                   </tr>
-                ))}
+                )) : <tr><td colSpan="4" className="p-8 text-center text-gray-500">No bookings found.</td></tr>}
               </tbody>
             </table>
         </div>
       )}
 
-      {/* ✅ NEW MESSAGES TAB CONTENT */}
+      {/* MESSAGES TAB CONTENT */}
       {activeTab === 'messages' && (
         <div className="bg-white rounded shadow overflow-hidden">
              <table className="w-full text-left">
               <thead className="bg-gray-100"><tr><th className="p-4">Name / Category</th><th className="p-4">Message</th><th className="p-4">Date</th></tr></thead>
               <tbody>
-                {contacts.map(c => (
+                {contacts.length > 0 ? contacts.map(c => (
                   <tr key={c._id} className="border-b hover:bg-gray-50">
                     <td className="p-4">
                         <p className="font-bold text-gray-800">{c.name}</p>
@@ -261,8 +284,7 @@ const AdminDashboard = () => {
                         {new Date(c.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
-                ))}
-                {contacts.length === 0 && <tr><td colSpan="3" className="p-10 text-center text-gray-500 italic">No messages found.</td></tr>}
+                )) : <tr><td colSpan="3" className="p-10 text-center text-gray-500 italic">No messages found.</td></tr>}
               </tbody>
             </table>
         </div>
