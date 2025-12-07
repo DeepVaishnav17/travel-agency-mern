@@ -12,8 +12,12 @@ const Home = () => {
       try {
         const tourRes = await api.get('/tours');
         const configRes = await api.get('/config');
-        // Filter only featured tours or take first 3
-        setTours(tourRes.data.slice(0, 3)); 
+        
+        // ✅ FIX: Filter out Archived tours BEFORE displaying them
+        const activeTours = tourRes.data.filter(tour => !tour.isArchived);
+        
+        // Take the first 3 active tours
+        setTours(activeTours.slice(0, 3)); 
         setConfig(configRes.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -50,9 +54,15 @@ const Home = () => {
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tours.map(tour => (
-            <TourCard key={tour._id} tour={tour} />
-          ))}
+          {tours.length > 0 ? (
+            tours.map(tour => (
+              <TourCard key={tour._id} tour={tour} />
+            ))
+          ) : (
+            <div className="col-span-3 text-center text-gray-500 py-10">
+              <p>No active tours available right now.</p>
+            </div>
+          )}
         </div>
         
         <div className="text-center mt-12">

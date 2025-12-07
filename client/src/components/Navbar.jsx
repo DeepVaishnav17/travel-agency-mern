@@ -23,7 +23,7 @@ const Navbar = () => {
         <div className="hidden md:flex gap-6 font-medium text-gray-700">
           <Link to="/" className="hover:text-primary transition">Home</Link>
           <Link to="/tours" className="hover:text-primary transition">Tours</Link>
-          <Link to="/contact" className="hover:text-primary transition">Contact</Link>
+          {/* <Link to="/contact" className="hover:text-primary transition">Contact</Link> */}
         </div>
 
         {/* Auth Buttons */}

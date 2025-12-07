@@ -9,7 +9,10 @@ const Tours = () => {
   useEffect(() => {
     api.get('/tours')
       .then(res => {
-        setTours(res.data);
+        // ✅ FIX: Filter out Archived tours here
+        const activeTours = res.data.filter(tour => !tour.isArchived);
+        
+        setTours(activeTours);
         setLoading(false);
       })
       .catch(err => {
@@ -26,12 +29,19 @@ const Tours = () => {
       </p>
 
       {loading ? (
-        <div className="text-center py-20">Loading tours...</div>
+        <div className="text-center py-20 text-gray-500 font-bold">Loading tours...</div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tours.map(tour => (
-            <TourCard key={tour._id} tour={tour} />
-          ))}
+          {tours.length > 0 ? (
+            tours.map(tour => (
+              <TourCard key={tour._id} tour={tour} />
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-10 text-gray-500">
+                <h3 className="text-xl font-bold">No active tours found.</h3>
+                <p>Please check back later for new packages!</p>
+            </div>
+          )}
         </div>
       )}
     </div>

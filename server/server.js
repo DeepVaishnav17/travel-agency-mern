@@ -25,6 +25,7 @@ app.use(helmet());
 app.get('/', (req, res) => {
   res.send('Tours & Travels API is running...');
 });
+app.use('/api/contact', require('./routes/contactRoutes'));
 
 // Import Routes (We will create these in Phase 2)
 app.use('/api/auth', require('./routes/authRoutes'));

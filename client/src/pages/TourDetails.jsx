@@ -1,23 +1,39 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { FaClock, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { FaClock, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaCalendarAlt, FaUserFriends, FaTimes } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 const TourDetails = () => {
   const { id } = useParams();
+  
   const [tour, setTour] = useState(null);
-    
-    const navigate = useNavigate();
-  const [bookingForm, setBookingForm] = useState({
-    fullName: '', email: '', phone: '', travelDate: '', travelers: 1
-  });
+  const [showInquiryModal, setShowInquiryModal] = useState(false); // Controls the popup
+  const [selectedDay, setSelectedDay] = useState(null); // Controls Itinerary Modal
+  
+  // Define initial state so we can easily reset it later
+  const initialFormState = { fullName: '', email: '', phone: '', travelDate: '', travelers: 1 };
+  const [bookingForm, setBookingForm] = useState(initialFormState);
 
-  const handleBooking = async (e) => {
+  useEffect(() => {
+    api.get(`/tours/${id}`)
+      .then(res => setTour(res.data))
+      .catch(err => console.error(err));
+  }, [id]);
+
+  // 1. Triggered when user clicks "Send Inquiry" button
+  const handlePreSubmit = (e) => {
     e.preventDefault();
+    if(!bookingForm.fullName || !bookingForm.email || !bookingForm.phone || !bookingForm.travelDate) {
+        return toast.error("Please fill in all required fields");
+    }
+    setShowInquiryModal(true); // Open the Confirmation Modal
+  };
+
+  // 2. Triggered when user clicks "YES" inside the Modal
+  const confirmBooking = async () => {
     try {
-      // Calculate total price (rough estimate)
+      setShowInquiryModal(false); // Close modal
       const totalPrice = bookingForm.travelers * tour.price;
 
       await api.post('/bookings', {
@@ -26,106 +42,202 @@ const TourDetails = () => {
         totalPrice
       });
 
-      toast.success('Inquiry Sent! We will contact you shortly.');
-      navigate('/'); // Redirect to home
+      toast.success('Inquiry Sent! Check your email for confirmation.');
+      
+      // ✅ FIX: Reset the form state to clear inputs immediately
+      setBookingForm(initialFormState); 
+
     } catch (error) {
+      console.error(error);
       toast.error('Booking failed. Please try again.');
     }
   };
 
-  useEffect(() => {
-    api.get(`/tours/${id}`)
-      .then(res => setTour(res.data))
-      .catch(err => console.error(err));
-  }, [id]);
+  // Helper to extract YouTube ID for embed
+  const getYoutubeEmbed = (url) => {
+    if(!url) return "";
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : url;
+  };
 
-  if (!tour) return <div className="text-center py-20">Loading details...</div>;
+  if (!tour) return <div className="text-center py-20 text-gray-500 font-bold">Loading details...</div>;
 
   return (
-    <div>
+    <div className="bg-gray-50 min-h-screen pb-12">
       {/* Header Image */}
       <div className="relative h-[60vh]">
         <img src={tour.mainImage} alt={tour.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
           <div className="text-center text-white px-4">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">{tour.title}</h1>
-            <div className="flex items-center justify-center gap-6 text-xl">
-              <span className="flex items-center gap-2"><FaClock /> {tour.duration}</span>
-              <span className="flex items-center gap-2"><FaMapMarkerAlt /> {tour.destination}</span>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 shadow-sm">{tour.title}</h1>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-xl">
+              <span className="flex items-center gap-2 bg-white/20 px-4 py-1 rounded-full backdrop-blur-sm"><FaClock /> {tour.duration}</span>
+              <span className="flex items-center gap-2 bg-white/20 px-4 py-1 rounded-full backdrop-blur-sm"><FaMapMarkerAlt /> {tour.destination}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-12 grid lg:grid-cols-3 gap-12">
-        {/* Left Column: Details & Itinerary */}
+        
+        {/* LEFT COLUMN: Details, Itinerary & Gallery */}
         <div className="lg:col-span-2 space-y-12">
           
           {/* Overview */}
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Overview</h2>
-            <p className="text-gray-600 leading-relaxed whitespace-pre-line">{tour.desc}</p>
+          <section className="bg-white p-8 rounded-xl shadow-sm">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">Overview</h2>
+            <p className="text-gray-600 leading-relaxed whitespace-pre-line text-lg">{tour.desc}</p>
+            
+            <div className="mt-8 grid md:grid-cols-2 gap-6">
+                 <div>
+                    <h4 className="font-bold mb-2 text-green-700">Inclusions</h4>
+                    <ul className="space-y-2">
+                        {tour.inclusions?.map((inc, i) => (
+                            <li key={i} className="flex items-center gap-2 text-sm text-gray-600"><FaCheckCircle className="text-green-500" /> {inc}</li>
+                        ))}
+                    </ul>
+                 </div>
+                 <div>
+                    <h4 className="font-bold mb-2 text-red-700">Exclusions</h4>
+                    <ul className="space-y-2">
+                        {tour.exclusions?.map((exc, i) => (
+                            <li key={i} className="flex items-center gap-2 text-sm text-gray-600"><FaTimesCircle className="text-red-500" /> {exc}</li>
+                        ))}
+                    </ul>
+                 </div>
+            </div>
           </section>
 
           {/* ITINERARY (Timeline UI) */}
-          <section>
-            <h2 className="text-2xl font-bold mb-8">Itinerary</h2>
-            <div className="relative border-l-4 border-blue-200 ml-4 space-y-8">
+          <section className="bg-white p-8 rounded-xl shadow-sm">
+            <h2 className="text-2xl font-bold mb-8 text-gray-800 border-b pb-2">Schedule</h2>
+            <div className="relative border-l-4 border-orange-200 ml-4 space-y-10">
               {tour.timeline?.map((item, index) => (
                 <div key={index} className="relative pl-8">
                   {/* Dot */}
-                  <span className="absolute -left-[14px] top-0 bg-primary h-6 w-6 rounded-full border-4 border-white"></span>
+                  <span className="absolute -left-[14px] top-0 bg-orange-500 h-6 w-6 rounded-full border-4 border-white shadow-sm"></span>
                   
-                  <h3 className="text-xl font-bold text-gray-800">Day {item.day}: {item.title}</h3>
-                  <p className="text-gray-600 mt-2">{item.desc}</p>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Day {item.day}</span>
+                  <h3 className="text-xl font-bold text-gray-800 mt-1">{item.title}</h3>
+                  <p className="text-gray-500 mt-2 line-clamp-2">{item.desc}</p>
+                  
+                  <button 
+                    onClick={() => setSelectedDay(item)}
+                    className="text-orange-500 font-bold text-sm mt-2 hover:underline flex items-center gap-1 transition"
+                  >
+                    Know more ↗
+                  </button>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Gallery */}
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Gallery</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {tour.gallery?.map((img, idx) => (
-                <img key={idx} src={img} alt="Gallery" className="rounded-lg h-32 w-full object-cover" />
+          {/* VIDEO REVIEWS (Replaces Gallery) */}
+          <section className="bg-white p-8 rounded-xl shadow-sm">
+            <h2 className="text-2xl font-bold mb-6 border-b pb-2 text-gray-800">Happy Customers</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {tour.reviews?.map((review, idx) => (
+                <div key={idx} className="bg-gray-50 rounded-lg overflow-hidden border shadow-sm">
+                    <div className="aspect-video bg-black">
+                        <iframe 
+                            width="100%" height="100%" 
+                            src={getYoutubeEmbed(review.videoUrl)} 
+                            title="Customer Review" 
+                            frameBorder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowFullScreen
+                        ></iframe>
+                    </div>
+                    <div className="p-4">
+                        <h4 className="font-bold text-gray-700">{review.customerName}</h4>
+                        <div className="text-yellow-500 text-sm mt-1">★★★★★</div>
+                    </div>
+                </div>
               ))}
+              {(!tour.reviews || tour.reviews.length === 0) && <p className="text-gray-500 italic">No video reviews added yet.</p>}
             </div>
           </section>
         </div>
 
-        {/* Right Column: Booking Card */}
+        {/* RIGHT COLUMN: Booking Form */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-xl shadow-xl sticky top-24 border">
-            <div className="mb-6">
-              <span className="text-gray-500 block">Total Price per Person</span>
-              <span className="text-3xl font-bold text-primary">₹{tour.price.toLocaleString()}</span>
+          <div className="bg-white p-6 rounded-xl shadow-xl sticky top-24 border border-gray-100">
+            <div className="mb-6 text-center border-b pb-4">
+              <span className="text-gray-500 block text-sm uppercase">Starting from</span>
+              <span className="text-4xl font-bold text-primary">₹{tour.price.toLocaleString()}</span>
+              <span className="text-xs text-gray-400">per person</span>
             </div>
-
-            <div className="space-y-4 mb-6">
-              <h4 className="font-bold">Includes:</h4>
-              <ul className="text-sm space-y-2">
-                {tour.inclusions?.map((inc, i) => (
-                   <li key={i} className="flex items-center gap-2 text-green-600"><FaCheckCircle /> {inc}</li>
-                ))}
-              </ul>
-              <h4 className="font-bold pt-4">Excludes:</h4>
-              <ul className="text-sm space-y-2">
-                 {tour.exclusions?.map((exc, i) => (
-                   <li key={i} className="flex items-center gap-2 text-red-500"><FaTimesCircle /> {exc}</li>
-                ))}
-              </ul>
-            </div>
-
-           <button 
-                type="submit"
-                className="w-full bg-secondary text-white py-3 rounded-lg font-bold hover:bg-orange-600 transition"
-              >
-                Send Inquiry
-              </button>
+            
+            <form onSubmit={handlePreSubmit} className="space-y-4">
+              <input type="text" placeholder="Full Name" required className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" value={bookingForm.fullName} onChange={e => setBookingForm({...bookingForm, fullName: e.target.value})} />
+              <input type="email" placeholder="Email" required className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" value={bookingForm.email} onChange={e => setBookingForm({...bookingForm, email: e.target.value})} />
+              <input type="tel" placeholder="Phone" required className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" value={bookingForm.phone} onChange={e => setBookingForm({...bookingForm, phone: e.target.value})} />
+              <div className="grid grid-cols-2 gap-3">
+                 <input type="date" required className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" value={bookingForm.travelDate} onChange={e => setBookingForm({...bookingForm, travelDate: e.target.value})} />
+                 <input type="number" min="1" defaultValue="1" required className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" value={bookingForm.travelers} onChange={e => setBookingForm({...bookingForm, travelers: e.target.value})} />
+              </div>
+              
+              <div className="pt-2 flex justify-between font-bold text-gray-700">
+                  <span>Total:</span>
+                  <span className="text-primary">₹{(bookingForm.travelers * tour.price).toLocaleString()}</span>
+              </div>
+              
+              <button type="submit" className="w-full bg-secondary text-white py-3 rounded-lg font-bold hover:bg-orange-600 transition shadow-lg transform hover:-translate-y-1">Send Inquiry</button>
+            </form>
           </div>
         </div>
       </div>
+
+      {/* --- INQUIRY CONFIRM MODAL --- */}
+      {showInquiryModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
+            <h3 className="text-2xl font-bold mb-2 text-gray-800">Confirm Inquiry</h3>
+            <p className="text-gray-600 mb-6">Send inquiry for <strong>{tour.title}</strong>?</p>
+            <div className="flex justify-center gap-4">
+              <button onClick={() => setShowInquiryModal(false)} className="px-6 py-2 border rounded hover:bg-gray-100">Cancel</button>
+              <button onClick={confirmBooking} className="px-6 py-2 bg-primary text-white rounded font-bold shadow hover:bg-blue-600">Yes, Send</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- ITINERARY DETAILS MODAL (DAY WISE) --- */}
+      {selectedDay && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fadeIn">
+            <div className="bg-white rounded-xl overflow-hidden max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl">
+                <button 
+                    onClick={() => setSelectedDay(null)}
+                    className="absolute top-4 right-4 z-10 bg-white/80 p-2 rounded-full hover:bg-white text-black transition"
+                >
+                    <FaTimes size={20} />
+                </button>
+
+                {/* Day Image Background */}
+                <div className="h-64 relative">
+                    <img 
+                        src={selectedDay.image || tour.mainImage} 
+                        alt={selectedDay.title} 
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end p-8">
+                        <div>
+                            <span className="text-orange-400 font-bold uppercase tracking-widest text-sm mb-1 block">Day {selectedDay.day}</span>
+                            <h2 className="text-3xl font-bold text-white leading-tight">{selectedDay.title}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-8">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
+                        {selectedDay.desc}
+                    </p>
+                </div>
+            </div>
+        </div>
+      )}
+
     </div>
   );
 };
