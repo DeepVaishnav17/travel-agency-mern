@@ -2,15 +2,18 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// ✅ FIX: Use explicit Host and Port 465 (SSL) to avoid Render timeouts
+// ✅ FIX: Use Port 587 with 'rejectUnauthorized: false' to bypass timeouts
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,        // Secure SSL port
-  secure: true,     // Must be true for port 465
+  port: 587,       // Use Standard TLS port
+  secure: false,   // Must be false for port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // ✅ This bypasses the certificate error causing the timeout
+  }
 });
 
 // 1. Send Booking Confirmation to CUSTOMER
@@ -31,11 +34,11 @@ const sendBookingEmail = async (userEmail, tourName, fullName) => {
   return transporter.sendMail(mailOptions);
 };
 
-// 2. Send Booking Alert to ADMIN (Updated with Travelers Count)
+// 2. Send Booking Alert to ADMIN
 const sendAdminBookingAlert = async (details) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER, // Send to Admin
+    to: process.env.EMAIL_USER, 
     subject: `New Inquiry: ${details.tourName}`,
     html: `
       <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd;">
@@ -46,9 +49,7 @@ const sendAdminBookingAlert = async (details) => {
           <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Email:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${details.email}</td></tr>
           <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Tour:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${details.tourName}</td></tr>
           <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Travel Date:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${details.travelDate}</td></tr>
-          
           <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Travelers:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${details.travelers} Person(s)</td></tr>
-          
           <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Total Est:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">₹${details.totalPrice}</td></tr>
         </table>
       </div>
