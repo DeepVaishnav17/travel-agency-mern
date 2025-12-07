@@ -1,10 +1,26 @@
 const Tour = require('../models/Tour');
 
-// @desc    Get all tours
-// @route   GET /api/tours
+// @desc    Get all tours (Searchable)
+// @route   GET /api/tours?search=keyword
 const getTours = async (req, res) => {
   try {
-    const tours = await Tour.find({});
+    const { search } = req.query;
+    
+    // Build query object
+    let query = {};
+    
+    // If a search term exists, filter by Title OR Destination (case-insensitive)
+    if (search) {
+      query = {
+        $or: [
+          { title: { $regex: search, $options: "i" } },       
+          { destination: { $regex: search, $options: "i" } }
+        ]
+      };
+    }
+
+    // Default: Sort by newest first
+    const tours = await Tour.find(query).sort({ createdAt: -1 });
     res.json(tours);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -37,13 +53,12 @@ const createTour = async (req, res) => {
 
 // @desc    Update a tour (Admin)
 // @route   PUT /api/tours/:id
-// ✅ THIS IS THE NEW FUNCTION YOU NEEDED
 const updateTour = async (req, res) => {
   try {
     const updatedTour = await Tour.findByIdAndUpdate(
       req.params.id, 
       req.body, 
-      { new: true, runValidators: true } // Returns the updated document
+      { new: true, runValidators: true }
     );
     
     if (updatedTour) {
