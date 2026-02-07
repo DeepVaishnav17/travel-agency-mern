@@ -4,12 +4,11 @@ const Review = require('../models/Review');
 // @route   POST /api/reviews
 const createReview = async (req, res) => {
   try {
-    const { rating, comment } = req.body;
-    
-    // Ensure user is logged in (req.user comes from protect middleware)
+    const { name, rating, comment } = req.body;
+
+    // Anonymous review
     const newReview = await Review.create({
-      name: req.user.name,
-      user: req.user._id,
+      name: name || 'Anonymous',
       rating,
       comment
     });
@@ -26,8 +25,8 @@ const getTopReviews = async (req, res) => {
   try {
     // Filter: Rating >= 4, Sort: Newest first, Limit: 6
     const reviews = await Review.find({ rating: { $gte: 4 } })
-                                .sort({ createdAt: -1 })
-                                .limit(6); 
+      .sort({ createdAt: -1 })
+      .limit(6);
     res.json(reviews);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
@@ -51,7 +50,7 @@ const getAllReviews = async (req, res) => {
 const deleteReview = async (req, res) => {
   try {
     const review = await Review.findById(req.params.id);
-    
+
     if (review) {
       await review.deleteOne();
       res.json({ message: 'Review removed' });

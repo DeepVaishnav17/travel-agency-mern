@@ -1,15 +1,15 @@
 const express = require('express');
 const { createBooking, getAllBookings, updateStatus } = require('../controllers/bookingController');
 // ✅ Import 'protect' middleware
-const { protect, admin } = require('../middleware/authMiddleware'); 
+const { checkAdminKey } = require('../middleware/adminAuth');
 
 const router = express.Router();
 
-// ✅ UPDATED: Added 'protect' here. Now only logged-in users can book.
-router.post('/', protect, createBooking);
+// Public: Create Booking
+router.post('/', createBooking);
 
 // Admin Routes: View & Update bookings
-router.get('/', protect, admin, getAllBookings);
-router.put('/:id', protect, admin, updateStatus);
+router.get('/', checkAdminKey, getAllBookings);
+router.put('/:id', checkAdminKey, updateStatus);
 
 module.exports = router;

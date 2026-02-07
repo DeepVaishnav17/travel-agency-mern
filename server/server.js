@@ -35,7 +35,6 @@ app.get('/', (req, res) => {
 });
 
 // --- API ROUTES ---
-app.use('/api/auth', require('./routes/authRoutes'));         // Login, Register, Users
 app.use('/api/tours', require('./routes/tourRoutes'));        // Tours (CRUD, Search)
 app.use('/api/bookings', require('./routes/bookingRoutes'));  // Bookings
 app.use('/api/contact', require('./routes/contactRoutes'));   // Contact Messages

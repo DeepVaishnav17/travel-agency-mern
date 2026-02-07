@@ -1,15 +1,15 @@
 const express = require('express');
 const { getTours, getTourById, createTour, updateTour, deleteTour } = require('../controllers/tourController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { checkAdminKey } = require('../middleware/adminAuth');
 const router = express.Router();
 
 router.route('/')
   .get(getTours)
-  .post(protect, admin, createTour);
+  .post(checkAdminKey, createTour);
 
 router.route('/:id')
   .get(getTourById)
-  .put(protect, admin, updateTour)   // ✅ ADDED THIS LINE (Required for Edit/Archive)
-  .delete(protect, admin, deleteTour);
+  .put(checkAdminKey, updateTour)
+  .delete(checkAdminKey, deleteTour);
 
 module.exports = router;

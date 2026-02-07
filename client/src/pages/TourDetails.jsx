@@ -8,13 +8,13 @@ const TourDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [tour, setTour] = useState(null);
   const [showInquiryModal, setShowInquiryModal] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
-  
+
   // 1. Store the "Real" User Profile (for resetting later)
-  const [userProfile, setUserProfile] = useState(null);
+
 
   // 2. Form State
   const initialFormState = { fullName: '', email: '', phone: '', travelDate: '', travelers: 1 };
@@ -28,51 +28,19 @@ const TourDetails = () => {
   }, [id]);
 
   // --- EFFECT 2: 🧠 INSTANT AUTO-FILL LOGIC ---
+  // Removed User Auth Logic
   useEffect(() => {
-    // Check Local Storage (Instant Access)
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
-    const savedForm = sessionStorage.getItem('pendingBooking');
-
-    // Scenario A: User came back after forced login (Restore their typing)
-    if (savedForm) {
-        setBookingForm(JSON.parse(savedForm));
-        sessionStorage.removeItem('pendingBooking');
-        
-        // Even if we restore a form, we still want to know who the real user is for future resets
-        if (userInfo) {
-            setUserProfile({ name: userInfo.name, email: userInfo.email });
-        }
-    } 
-    // Scenario B: User is already logged in (Instant Auto-Fill)
-    else if (userInfo) {
-        // 1. Save real profile for resets
-        setUserProfile({ name: userInfo.name, email: userInfo.email });
-        
-        // 2. Pre-fill the form immediately
-        setBookingForm(prev => ({
-            ...prev,
-            fullName: userInfo.name, 
-            email: userInfo.email
-        }));
-    }
+    // Optional: You could still check valid session storage if you want persistence
   }, []);
 
   // --- HANDLER: Pre-Submit Check ---
   const handlePreSubmit = (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    
-    // If NOT logged in: Save Data & Redirect to Login
-    if (!token) {
-        toast.info("Please Login to send an inquiry.");
-        sessionStorage.setItem('pendingBooking', JSON.stringify(bookingForm));
-        return navigate('/login', { state: { from: location } });
-    }
 
-    if(!bookingForm.fullName || !bookingForm.email || !bookingForm.phone || !bookingForm.travelDate) {
-        return toast.error("Please fill in all required fields");
+    if (!bookingForm.fullName || !bookingForm.email || !bookingForm.phone || !bookingForm.travelDate) {
+      return toast.error("Please fill in all required fields");
     }
-    setShowInquiryModal(true); 
+    setShowInquiryModal(true);
   };
 
   // --- HANDLER: Confirm Booking ---
@@ -84,29 +52,18 @@ const TourDetails = () => {
       await api.post('/bookings', { ...bookingForm, tour: tour._id, totalPrice });
 
       toast.success('Inquiry Sent! Check your email.');
-      
-      // ✅ SMART RESET:
-      // If user is logged in, reset Name/Email back to THEIR profile (undoing any edits for friends)
-      // allowing them to book again easily.
-      if (userProfile) {
-          setBookingForm({ ...initialFormState, fullName: userProfile.name, email: userProfile.email });
-      } else {
-          setBookingForm(initialFormState);
-      }
+
+      // Reset form
+      setBookingForm(initialFormState);
 
     } catch (error) {
       console.error(error);
-      if(error.response && error.response.status === 401) {
-          toast.error("Session expired. Please login again.");
-          navigate('/login');
-      } else {
-          toast.error('Booking failed. Please try again.');
-      }
+      toast.error('Booking failed. Please try again.');
     }
   };
 
   const getYoutubeEmbed = (url) => {
-    if(!url) return "";
+    if (!url) return "";
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : url;
@@ -137,14 +94,14 @@ const TourDetails = () => {
             <h2 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">Overview</h2>
             <p className="text-gray-600 leading-relaxed whitespace-pre-line text-lg">{tour.desc}</p>
             <div className="mt-8 grid md:grid-cols-2 gap-6">
-                 <div>
-                    <h4 className="font-bold mb-2 text-green-700">Inclusions</h4>
-                    <ul className="space-y-2">{tour.inclusions?.map((inc, i) => <li key={i} className="flex items-center gap-2 text-sm text-gray-600"><FaCheckCircle className="text-green-500" /> {inc}</li>)}</ul>
-                 </div>
-                 <div>
-                    <h4 className="font-bold mb-2 text-red-700">Exclusions</h4>
-                    <ul className="space-y-2">{tour.exclusions?.map((exc, i) => <li key={i} className="flex items-center gap-2 text-sm text-gray-600"><FaTimesCircle className="text-red-500" /> {exc}</li>)}</ul>
-                 </div>
+              <div>
+                <h4 className="font-bold mb-2 text-green-700">Inclusions</h4>
+                <ul className="space-y-2">{tour.inclusions?.map((inc, i) => <li key={i} className="flex items-center gap-2 text-sm text-gray-600"><FaCheckCircle className="text-green-500" /> {inc}</li>)}</ul>
+              </div>
+              <div>
+                <h4 className="font-bold mb-2 text-red-700">Exclusions</h4>
+                <ul className="space-y-2">{tour.exclusions?.map((exc, i) => <li key={i} className="flex items-center gap-2 text-sm text-gray-600"><FaTimesCircle className="text-red-500" /> {exc}</li>)}</ul>
+              </div>
             </div>
           </section>
 
@@ -168,10 +125,10 @@ const TourDetails = () => {
             <div className="grid md:grid-cols-2 gap-6">
               {tour.reviews?.map((review, idx) => (
                 <div key={idx} className="bg-gray-50 rounded-lg overflow-hidden border shadow-sm">
-                    <div className="aspect-video bg-black">
-                        <iframe width="100%" height="100%" src={getYoutubeEmbed(review.videoUrl)} title="Review" frameBorder="0" allowFullScreen></iframe>
-                    </div>
-                    <div className="p-4"><h4 className="font-bold text-gray-700">{review.customerName}</h4><div className="text-yellow-500 text-sm mt-1">★★★★★</div></div>
+                  <div className="aspect-video bg-black">
+                    <iframe width="100%" height="100%" src={getYoutubeEmbed(review.videoUrl)} title="Review" frameBorder="0" allowFullScreen></iframe>
+                  </div>
+                  <div className="p-4"><h4 className="font-bold text-gray-700">{review.customerName}</h4><div className="text-yellow-500 text-sm mt-1">★★★★★</div></div>
                 </div>
               ))}
               {(!tour.reviews || tour.reviews.length === 0) && <p className="text-gray-500 italic">No video reviews added yet.</p>}
@@ -187,48 +144,48 @@ const TourDetails = () => {
               <span className="text-4xl font-bold text-primary">₹{tour.price.toLocaleString()}</span>
               <span className="text-xs text-gray-400">per person</span>
             </div>
-            
+
             <form onSubmit={handlePreSubmit} className="space-y-4">
               {/* Editable Name (Auto-filled but changeable) */}
-              <input 
-                type="text" placeholder="Full Name" required 
-                className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" 
-                value={bookingForm.fullName} 
-                onChange={e => setBookingForm({...bookingForm, fullName: e.target.value})} 
+              <input
+                type="text" placeholder="Full Name" required
+                className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none"
+                value={bookingForm.fullName}
+                onChange={e => setBookingForm({ ...bookingForm, fullName: e.target.value })}
               />
               {/* Editable Email */}
-              <input 
-                type="email" placeholder="Email" required 
-                className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" 
-                value={bookingForm.email} 
-                onChange={e => setBookingForm({...bookingForm, email: e.target.value})} 
+              <input
+                type="email" placeholder="Email" required
+                className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none"
+                value={bookingForm.email}
+                onChange={e => setBookingForm({ ...bookingForm, email: e.target.value })}
               />
-              <input 
-                type="tel" placeholder="Phone" required 
-                className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" 
-                value={bookingForm.phone} 
-                onChange={e => setBookingForm({...bookingForm, phone: e.target.value})} 
+              <input
+                type="tel" placeholder="Phone" required
+                className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none"
+                value={bookingForm.phone}
+                onChange={e => setBookingForm({ ...bookingForm, phone: e.target.value })}
               />
               <div className="grid grid-cols-2 gap-3">
-                 <input 
-                    type="date" required 
-                    className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" 
-                    value={bookingForm.travelDate} 
-                    onChange={e => setBookingForm({...bookingForm, travelDate: e.target.value})} 
-                 />
-                 <input 
-                    type="number" min="1" defaultValue="1" required 
-                    className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none" 
-                    value={bookingForm.travelers} 
-                    onChange={e => setBookingForm({...bookingForm, travelers: e.target.value})} 
-                 />
+                <input
+                  type="date" required
+                  className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none"
+                  value={bookingForm.travelDate}
+                  onChange={e => setBookingForm({ ...bookingForm, travelDate: e.target.value })}
+                />
+                <input
+                  type="number" min="1" defaultValue="1" required
+                  className="w-full border bg-gray-50 p-3 rounded focus:ring-2 focus:ring-primary outline-none"
+                  value={bookingForm.travelers}
+                  onChange={e => setBookingForm({ ...bookingForm, travelers: e.target.value })}
+                />
               </div>
-              
+
               <div className="pt-2 flex justify-between font-bold text-gray-700">
-                  <span>Total:</span>
-                  <span className="text-primary">₹{(bookingForm.travelers * tour.price).toLocaleString()}</span>
+                <span>Total:</span>
+                <span className="text-primary">₹{(bookingForm.travelers * tour.price).toLocaleString()}</span>
               </div>
-              
+
               <button type="submit" className="w-full bg-secondary text-white py-3 rounded-lg font-bold hover:bg-orange-600 transition shadow-lg transform hover:-translate-y-1">
                 Send Inquiry
               </button>
@@ -254,16 +211,16 @@ const TourDetails = () => {
       {/* --- ITINERARY MODAL --- */}
       {selectedDay && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white rounded-xl overflow-hidden max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl">
-                <button onClick={() => setSelectedDay(null)} className="absolute top-4 right-4 z-10 bg-white/80 p-2 rounded-full hover:bg-white text-black transition"><FaTimes size={20} /></button>
-                <div className="h-64 relative">
-                    <img src={selectedDay.image || tour.mainImage} alt={selectedDay.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end p-8">
-                        <div><span className="text-orange-400 font-bold uppercase tracking-widest text-sm mb-1 block">Day {selectedDay.day}</span><h2 className="text-3xl font-bold text-white leading-tight">{selectedDay.title}</h2></div>
-                    </div>
-                </div>
-                <div className="p-8"><p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">{selectedDay.desc}</p></div>
+          <div className="bg-white rounded-xl overflow-hidden max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl">
+            <button onClick={() => setSelectedDay(null)} className="absolute top-4 right-4 z-10 bg-white/80 p-2 rounded-full hover:bg-white text-black transition"><FaTimes size={20} /></button>
+            <div className="h-64 relative">
+              <img src={selectedDay.image || tour.mainImage} alt={selectedDay.title} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end p-8">
+                <div><span className="text-orange-400 font-bold uppercase tracking-widest text-sm mb-1 block">Day {selectedDay.day}</span><h2 className="text-3xl font-bold text-white leading-tight">{selectedDay.title}</h2></div>
+              </div>
             </div>
+            <div className="p-8"><p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">{selectedDay.desc}</p></div>
+          </div>
         </div>
       )}
     </div>
