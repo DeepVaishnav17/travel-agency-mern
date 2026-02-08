@@ -1,8 +1,8 @@
 const express = require('express');
 const { getSiteConfig, updateSiteConfig } = require('../controllers/siteConfigController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { checkAdminKey } = require('../middleware/adminAuth');
 const router = express.Router();
 
-router.route('/').get(getSiteConfig).put(protect, admin, updateSiteConfig);
+router.route('/').get(getSiteConfig).put(checkAdminKey, updateSiteConfig);
 
 module.exports = router;

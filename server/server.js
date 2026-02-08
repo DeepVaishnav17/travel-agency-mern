@@ -26,7 +26,7 @@ app.use(cors({
   ],
   credentials: true, // Allow cookies and authorization headers
   methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"]
 }));
 
 // --- BASIC ROUTE ---
