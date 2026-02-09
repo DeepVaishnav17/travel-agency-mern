@@ -82,9 +82,10 @@ const Home = () => {
       subtitle: 'Experience the magic of the canals.'
     },
     {
-      image: 'https://images.unsplash.com/photo-1533929736472-594e45aa863f?q=80&w=1936&auto=format&fit=crop', // Santorini
+      image: '/image2.png', // Santorini
       title: 'Santorini Sunsets',
-      subtitle: 'Breathtaking views of the Aegean Sea.'
+      subtitle: 'Breathtaking views of the Aegean Sea.',
+      hideContent: true
     }
   ];
 
@@ -108,7 +109,7 @@ const Home = () => {
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentHeroSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
           >
             {/* Image */}
-            <div className="absolute inset-0 bg-black/40 z-10"></div>
+            {!slide.hideContent && <div className="absolute inset-0 bg-black/40 z-10"></div>}
             <img
               src={slide.image}
               alt={slide.title}
@@ -119,13 +120,12 @@ const Home = () => {
             />
 
             {/* Content */}
-            <div className="relative z-20 flex flex-col items-center justify-center h-full text-center text-white px-4">
-              <h1 className="text-5xl md:text-7xl font-bold mb-4 drop-shadow-lg transform transition duration-700 translate-y-0">{slide.title}</h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-2xl font-light">{slide.subtitle}</p>
-              <Link to="/tours" className="bg-secondary hover:bg-orange-600 text-white px-8 py-3 rounded-full text-lg font-semibold transition transform hover:scale-105 shadow-lg">
-                Start Your Journey
-              </Link>
-            </div>
+            {!slide.hideContent && (
+              <div className="relative z-20 flex flex-col items-center justify-center h-full text-center text-white px-4">
+                <h1 className="text-5xl md:text-7xl font-bold mb-4 drop-shadow-lg transform transition duration-700 translate-y-0">{slide.title}</h1>
+                <p className="text-xl md:text-2xl mb-8 max-w-2xl font-light">{slide.subtitle}</p>
+              </div>
+            )}
           </div>
         ))}
 
