@@ -1,4 +1,4 @@
-# 🌍 WanderLust - MERN Travel Agency Application
+# 🌍 Deep Tours & Travels - MERN Travel Agency Application
 
 A robust and modern Travel Agency website built using the MERN stack (MongoDB, Express, React, Node.js). It features a dynamic tour management system, admin dashboard, user inquiries, and responsive design.
 
