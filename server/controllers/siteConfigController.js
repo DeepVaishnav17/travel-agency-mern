@@ -27,7 +27,9 @@ const updateSiteConfig = async (req, res) => {
       config.banners = req.body.banners || config.banners;
       config.contactEmail = req.body.contactEmail || config.contactEmail;
       config.contactPhone = req.body.contactPhone || config.contactPhone;
+      config.contactPhone = req.body.contactPhone || config.contactPhone;
       config.contactAddress = req.body.contactAddress || config.contactAddress;
+      config.homeLayout = req.body.homeLayout || config.homeLayout;
     }
     await config.save();
     res.json(config);

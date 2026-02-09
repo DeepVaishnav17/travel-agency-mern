@@ -28,7 +28,8 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const domesticTours = tours.filter(t => t.category === 'Domestic');
+  // Fallback for tours with no category (legacy data)
+  const domesticTours = tours.filter(t => !t.category || t.category === 'Domestic');
   const internationalTours = tours.filter(t => t.category === 'International');
 
   // Default Layout if config is not yet loaded or doesn't have it
