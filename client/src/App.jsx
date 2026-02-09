@@ -8,6 +8,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import Home from './pages/Home';
 import Tours from './pages/Tours';
 import AdminDashboard from './pages/AdminDashboard';
+import About from './pages/About';
+import Services from './pages/Services';
 import Contact from './pages/Contact';
 import TermsConditions from './pages/TermsConditions';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -20,7 +22,8 @@ function App() {
         <main className="flex-grow pt-20"> {/* pt-20 to push content below fixed navbar */}
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/tours" element={<Tours />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
             <Route path="/tours" element={<Tours />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { FaPlaneDeparture, FaSearch } from 'react-icons/fa';
 
@@ -56,27 +56,19 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-1/3 border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition">
-          <FaSearch className="text-gray-400 mr-2 cursor-pointer" onClick={handleSearch} />
-          <input
-            type="text"
-            placeholder="Search destination..."
-            className="bg-transparent border-none outline-none w-full text-gray-700 placeholder-gray-400"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </form>
-
         {/* Links */}
         <div className="flex items-center gap-6 font-medium text-gray-700">
-          <Link to="/" className="hover:text-primary transition">Home</Link>
-          <Link to="/tours" className="hover:text-primary transition">Tours</Link>
+          <NavLink to="/" className={({ isActive }) => `px-4 py-2 rounded-full transition-all duration-300 ${isActive ? 'bg-primary text-white shadow-lg scale-105' : 'hover:text-primary hover:bg-gray-50'}`}>Home</NavLink>
+          <NavLink to="/about" className={({ isActive }) => `px-4 py-2 rounded-full transition-all duration-300 ${isActive ? 'bg-primary text-white shadow-lg scale-105' : 'hover:text-primary hover:bg-gray-50'}`}>About Us</NavLink>
+          <NavLink to="/services" className={({ isActive }) => `px-4 py-2 rounded-full transition-all duration-300 ${isActive ? 'bg-primary text-white shadow-lg scale-105' : 'hover:text-primary hover:bg-gray-50'}`}>Services</NavLink>
+          <NavLink to="/tours" className={({ isActive }) => `px-4 py-2 rounded-full transition-all duration-300 ${isActive ? 'bg-primary text-white shadow-lg scale-105' : 'hover:text-primary hover:bg-gray-50'}`}>Tours</NavLink>
+          <NavLink to="/contact" className={({ isActive }) => `px-4 py-2 rounded-full transition-all duration-300 ${isActive ? 'bg-primary text-white shadow-lg scale-105' : 'hover:text-primary hover:bg-gray-50'}`}>Contact Us</NavLink>
 
           {/* ✅ ADMIN LINKS */}
           {isAdmin && (
             <>
-              <Link to="/admin" className="text-purple-600 font-bold hover:text-purple-800 transition">Dashboard</Link>
-              <button onClick={handleLogout} className="text-red-500 hover:text-red-700 text-sm">Logout</button>
+              <Link to="/admin" className="text-purple-600 font-bold hover:text-purple-800 transition px-3 py-1">Dashboard</Link>
+              <button onClick={handleLogout} className="text-red-500 hover:text-red-700 text-sm font-bold border border-red-200 px-3 py-1 rounded hover:bg-red-50">Logout</button>
             </>
           )}
         </div>

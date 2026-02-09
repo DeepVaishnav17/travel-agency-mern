@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaVideo, FaCalendarDay, FaArchive, FaUndo, FaUser, FaStar } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaTimes, FaStar, FaArrowUp, FaArrowDown, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('tours');
@@ -10,7 +10,9 @@ const AdminDashboard = () => {
   // Data States
   const [tours, setTours] = useState([]);
   const [contacts, setContacts] = useState([]);
-  const [reviews, setReviews] = useState([]); // ✅ NEW
+  const [reviews, setReviews] = useState([]);
+  // ✅ NEW: Layout State
+  const [homeLayout, setHomeLayout] = useState([]);
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -43,6 +45,7 @@ const AdminDashboard = () => {
     if (activeTab === 'tours') fetchTours();
     else if (activeTab === 'messages') fetchContacts();
     else if (activeTab === 'reviews') fetchReviews();
+    else if (activeTab === 'layout') fetchLayout(); // ✅ NEW
   }, [activeTab, adminKey]);
 
   // If no key, show input form
@@ -80,6 +83,59 @@ const AdminDashboard = () => {
   };
   const fetchContacts = async () => { try { const { data } = await api.get('/contact'); setContacts(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
   const fetchReviews = async () => { try { const { data } = await api.get('/reviews'); setReviews(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
+
+  // ✅ NEW: Fetch Layout
+  const fetchLayout = async () => {
+    try {
+      const { data } = await api.get('/config');
+      if (data.homeLayout && data.homeLayout.length > 0) {
+        setHomeLayout(data.homeLayout.sort((a, b) => a.order - b.order));
+      } else {
+        // Default Fallback (Frontend side)
+        setHomeLayout([
+          { id: 'hero', label: 'Hero Section', isVisible: true, order: 1 },
+          { id: 'featured', label: 'Featured Tours', isVisible: true, order: 2 },
+          { id: 'whyChooseUs', label: 'Why Choose Us', isVisible: true, order: 3 },
+          { id: 'testimonials', label: 'Testimonials', isVisible: true, order: 4 },
+          { id: 'cta', label: 'Call to Action', isVisible: true, order: 5 }
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching config", error);
+    }
+  };
+
+  // ✅ NEW: Save Layout
+  const saveLayout = async (updatedLayout) => {
+    try {
+      await api.put('/config', { homeLayout: updatedLayout });
+      setHomeLayout(updatedLayout);
+      toast.success("Layout Updated!");
+    } catch (error) {
+      toast.error("Failed to save layout");
+    }
+  };
+
+  // --- LAYOUT ACTIONS ---
+  const moveSection = (index, direction) => {
+    const newLayout = [...homeLayout];
+    if (direction === 'up' && index > 0) {
+      [newLayout[index], newLayout[index - 1]] = [newLayout[index - 1], newLayout[index]];
+    } else if (direction === 'down' && index < newLayout.length - 1) {
+      [newLayout[index], newLayout[index + 1]] = [newLayout[index + 1], newLayout[index]];
+    }
+    // Update orders based on new index
+    const orderedLayout = newLayout.map((item, idx) => ({ ...item, order: idx + 1 }));
+    saveLayout(orderedLayout);
+  };
+
+  const toggleVisibility = (id) => {
+    const newLayout = homeLayout.map(item =>
+      item.id === id ? { ...item, isVisible: !item.isVisible } : item
+    );
+    saveLayout(newLayout);
+  };
+
 
   // --- IMAGE UPLOAD ---
   const uploadImage = async (file) => {
@@ -148,15 +204,15 @@ const AdminDashboard = () => {
     <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
 
-      {/* ✅ UPDATED TABS - Removed Bookings */}
+      {/* ✅ UPDATED TABS */}
       <div className="flex gap-6 border-b mb-8 overflow-x-auto bg-white p-4 rounded-lg shadow-sm">
-        {['tours', 'messages', 'reviews'].map(tab => (
+        {['tours', 'messages', 'reviews', 'layout'].map(tab => (
           <button
             key={tab}
             className={`pb-2 px-4 text-lg font-medium capitalize whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-4 border-primary text-primary font-bold' : 'text-gray-500 hover:text-gray-700'}`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab}
+            {tab === 'layout' ? 'Page Layout' : tab}
           </button>
         ))}
       </div>
@@ -278,9 +334,10 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* --- TAB 3: MESSAGES (Refactored) --- */}
+      {/* --- TAB 2: MESSAGES (Refactored) --- */}
       {activeTab === 'messages' && (
         <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+          {/* Same simplified table */}
           <table className="w-full text-left">
             <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider">
               <tr>
@@ -311,7 +368,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* --- TAB 4: REVIEWS --- */}
+      {/* --- TAB 3: REVIEWS --- */}
       {activeTab === 'reviews' && (
         <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
           <table className="w-full text-left">
@@ -338,6 +395,62 @@ const AdminDashboard = () => {
               )) : <tr><td colSpan="4" className="p-10 text-center text-gray-500">No reviews found.</td></tr>}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* --- TAB 4: PAGE LAYOUT --- */}
+      {activeTab === 'layout' && (
+        <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 p-8 max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-800">Home Page Layout</h2>
+            <p className="text-gray-500">Drag to reorder sections or toggle visibility.</p>
+          </div>
+
+          <div className="space-y-4">
+            {homeLayout.map((section, index) => (
+              <div key={section.id} className={`flex items-center justify-between p-4 rounded-lg border ${section.isVisible ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div className="flex items-center gap-4">
+                  <div className="bg-gray-100 text-gray-500 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-800 text-lg">{section.label}</h4>
+                    <span className="text-xs text-gray-400 uppercase tracking-wide">ID: {section.id}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Toggle Visibility */}
+                  <button
+                    onClick={() => toggleVisibility(section.id)}
+                    className={`p-2 rounded-full transition-colors ${section.isVisible ? 'text-green-600 bg-green-50 hover:bg-green-100' : 'text-gray-400 bg-gray-200 hover:bg-gray-300'}`}
+                    title={section.isVisible ? "Hide Section" : "Show Section"}
+                  >
+                    {section.isVisible ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+                  </button>
+
+                  {/* Vertical Separator */}
+                  <div className="w-px h-6 bg-gray-200 mx-2"></div>
+
+                  {/* Reorder Buttons */}
+                  <button
+                    onClick={() => moveSection(index, 'up')}
+                    disabled={index === 0}
+                    className={`p-2 rounded hover:bg-gray-100 transition ${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-primary'}`}
+                  >
+                    <FaArrowUp />
+                  </button>
+                  <button
+                    onClick={() => moveSection(index, 'down')}
+                    disabled={index === homeLayout.length - 1}
+                    className={`p-2 rounded hover:bg-gray-100 transition ${index === homeLayout.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-primary'}`}
+                  >
+                    <FaArrowDown />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
