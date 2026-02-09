@@ -2,8 +2,7 @@ const Booking = require('../models/Booking');
 const Tour = require('../models/Tour');
 const { sendBookingEmail, sendAdminBookingAlert } = require('../config/email');
 
-// @desc    Create new booking (Inquiry)
-// @route   POST /api/bookings
+
 const createBooking = async (req, res) => {
   try {
     const { tour, fullName, email, phone, travelDate, travelers, totalPrice } = req.body;
@@ -15,16 +14,15 @@ const createBooking = async (req, res) => {
 
     await newBooking.save();
 
-    // 🚀 SPEED FIX: We removed 'await' here so the server responds instantly.
-    // The emails will send in the background.
+
     try {
       const tourDetails = await Tour.findById(tour);
       if (tourDetails) {
-        // Send to Customer (Background)
+
         sendBookingEmail(email, tourDetails.title, fullName)
           .catch(err => console.error("User Email Failed:", err.message));
 
-        // Send to Admin (Background)
+
         sendAdminBookingAlert({
           fullName, email, phone,
           tourName: tourDetails.title,
@@ -35,7 +33,7 @@ const createBooking = async (req, res) => {
       console.error("Email setup error:", err.message);
     }
 
-    // Response is sent immediately, not waiting for emails
+
     res.status(201).json(newBooking);
 
   } catch (error) {
@@ -43,8 +41,6 @@ const createBooking = async (req, res) => {
   }
 };
 
-// @desc    Get all bookings (Admin only)
-// @route   GET /api/bookings
 const getAllBookings = async (req, res) => {
   try {
     const bookings = await Booking.find().populate('tour', 'title price').sort({ createdAt: -1 });
@@ -54,8 +50,6 @@ const getAllBookings = async (req, res) => {
   }
 };
 
-// @desc    Update booking status (Approve/Reject)
-// @route   PUT /api/bookings/:id
 const updateStatus = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);

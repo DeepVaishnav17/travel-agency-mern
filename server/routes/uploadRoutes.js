@@ -4,9 +4,9 @@ const router = express.Router();
 
 const { checkAdminKey } = require('../middleware/adminAuth');
 
-// Upload endpoint that returns the URL
+
 router.post('/', checkAdminKey, upload.single('image'), (req, res) => {
-  res.send(req.file.path); // Returns the Cloudinary URL
+  res.send(req.file.path);
 });
 
 module.exports = router;

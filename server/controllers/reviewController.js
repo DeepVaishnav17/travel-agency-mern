@@ -1,12 +1,11 @@
 const Review = require('../models/Review');
 
-// @desc    Create a new review
-// @route   POST /api/reviews
+
 const createReview = async (req, res) => {
   try {
     const { name, rating, comment } = req.body;
 
-    // Anonymous review
+
     const newReview = await Review.create({
       name: name || 'Anonymous',
       rating,
@@ -19,11 +18,10 @@ const createReview = async (req, res) => {
   }
 };
 
-// @desc    Get Top Reviews (Public - 4 & 5 Stars only)
-// @route   GET /api/reviews/top
+
 const getTopReviews = async (req, res) => {
   try {
-    // Filter: Rating >= 4, Sort: Newest first, Limit: 6
+
     const reviews = await Review.find({ rating: { $gte: 4 } })
       .sort({ createdAt: -1 })
       .limit(6);
@@ -33,11 +31,10 @@ const getTopReviews = async (req, res) => {
   }
 };
 
-// @desc    Get All Reviews (Admin Only)
-// @route   GET /api/reviews
+
 const getAllReviews = async (req, res) => {
   try {
-    // No filter, just sort by newest (Shows all stars)
+
     const reviews = await Review.find({}).sort({ createdAt: -1 });
     res.json(reviews);
   } catch (error) {
@@ -45,8 +42,7 @@ const getAllReviews = async (req, res) => {
   }
 };
 
-// @desc    Delete Review (Admin Only)
-// @route   DELETE /api/reviews/:id
+
 const deleteReview = async (req, res) => {
   try {
     const review = await Review.findById(req.params.id);
@@ -62,5 +58,5 @@ const deleteReview = async (req, res) => {
   }
 };
 
-// ✅ Export all 4 functions to be used in reviewRoutes.js
+
 module.exports = { createReview, getTopReviews, getAllReviews, deleteReview };

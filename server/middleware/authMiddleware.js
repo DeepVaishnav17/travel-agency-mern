@@ -8,7 +8,7 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // ✅ FIX: Use both .id or ._id to match your JWT payload
+
       const userId = decoded.id || decoded._id;
       req.user = await User.findById(userId).select('-password');
 
@@ -28,9 +28,9 @@ const protect = async (req, res, next) => {
 };
 
 const admin = (req, res, next) => {
-  // ✅ DEBUG LOG: See what role is actually in the DB
+
   console.log("Current User Role:", req.user?.role);
-  
+
   if (req.user && req.user.role === 'admin') {
     next();
   } else {

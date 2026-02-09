@@ -9,7 +9,6 @@ const AdminDashboard = () => {
 
   // Data States
   const [tours, setTours] = useState([]);
-  const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [reviews, setReviews] = useState([]); // ✅ NEW
 
@@ -19,8 +18,7 @@ const AdminDashboard = () => {
   const location = useLocation();
 
   const initialFormState = {
-    title: '', destination: '', price: '', duration: '', desc: '', mainImage: null,
-    inclusions: '', exclusions: '', timeline: [], reviews: [], isArchived: false
+    price: '', duration: '', mainImage: null, isArchived: false, category: 'Domestic'
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -32,7 +30,6 @@ const AdminDashboard = () => {
 
     if (keyFromUrl) {
       localStorage.setItem('adminKey', keyFromUrl);
-      // Remove query param from URL for cleaner look
       navigate('/admin', { replace: true });
       toast.success("Admin Access Granted");
     }
@@ -44,12 +41,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (!adminKey) return;
     if (activeTab === 'tours') fetchTours();
-    else if (activeTab === 'bookings') fetchBookings();
     else if (activeTab === 'messages') fetchContacts();
     else if (activeTab === 'reviews') fetchReviews();
   }, [activeTab, adminKey]);
 
-  // If no key, show input form (Rendered conditionally at end)
+  // If no key, show input form
   if (!adminKey) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -62,7 +58,6 @@ const AdminDashboard = () => {
             if (val) {
               localStorage.setItem('adminKey', val);
               setAdminKey(val);
-              // Trigger a reload to ensure Navbar updates too
               window.location.reload();
             }
           }}>
@@ -76,28 +71,14 @@ const AdminDashboard = () => {
 
   // --- API CALLS ---
   const fetchTours = async () => {
-    console.log("Fetching tours...");
     try {
       const { data } = await api.get('/tours');
-      console.log("Tours fetched:", data);
       setTours(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Error fetching tours:", error);
       toast.error("Failed to load tours");
     }
   };
-  const fetchBookings = async () => {
-    try {
-      const { data } = await api.get('/bookings');
-      setBookings(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
-      toast.error("Failed to load bookings");
-    }
-  };
   const fetchContacts = async () => { try { const { data } = await api.get('/contact'); setContacts(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
-
-  // ✅ NEW FETCH FUNCTION
   const fetchReviews = async () => { try { const { data } = await api.get('/reviews'); setReviews(Array.isArray(data) ? data : []); } catch (error) { console.error("Error"); } };
 
   // --- IMAGE UPLOAD ---
@@ -117,7 +98,7 @@ const AdminDashboard = () => {
   // --- MANAGE TOURS ---
   const handleEditClick = (tour) => {
     setEditingId(tour._id);
-    setFormData({ ...tour, inclusions: tour.inclusions?.join(', '), exclusions: tour.exclusions?.join(', '), timeline: tour.timeline || [], reviews: tour.reviews || [] });
+    setFormData({ ...tour });
     setShowAddForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -132,8 +113,19 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       const finalData = { ...formData };
-      if (typeof finalData.inclusions === 'string') finalData.inclusions = finalData.inclusions.split(',').map(i => i.trim());
-      if (typeof finalData.exclusions === 'string') finalData.exclusions = finalData.exclusions.split(',').map(i => i.trim());
+
+      // Auto-format Duration (e.g., "5 Days / 4 Nights")
+      if (finalData.duration) {
+        let formatted = finalData.duration
+          .replace(/\s+/g, ' ') // Remove extra spaces
+          .replace(/(\d+)\s*(days?)/i, '$1 Days')
+          .replace(/(\d+)\s*(nights?)/i, '$1 Nights')
+          .replace(/\//g, ' / ') // Ensure spaces around slash
+          .replace(/\s+/g, ' ') // Clean up again
+          .trim();
+        finalData.duration = formatted;
+      }
+
       if (!finalData.mainImage) finalData.mainImage = "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop";
 
       if (editingId) { await api.put(`/tours/${editingId}`, finalData); toast.success('Tour Updated!'); }
@@ -143,34 +135,25 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteTour = async (id) => { if (window.confirm('Delete this tour?')) { await api.delete(`/tours/${id}`); fetchTours(); toast.info('Deleted'); } };
-  const handleStatusChange = async (id, status) => { await api.put(`/bookings/${id}`, { status }); fetchBookings(); toast.success(`Marked as ${status}`); };
 
-  // --- NEW: DELETE REVIEW ---
   const handleDeleteReview = async (id) => {
     if (window.confirm('Remove this review permanently?')) {
       try { await api.delete(`/reviews/${id}`); fetchReviews(); toast.success('Review Removed'); } catch (err) { toast.error('Failed'); }
     }
   };
 
-  // Helper Logic for Tour Form
-  const addDay = () => setFormData({ ...formData, timeline: [...formData.timeline, { day: formData.timeline.length + 1, title: '', desc: '', image: '' }] });
-  const updateDay = (i, f, v) => { const n = [...formData.timeline]; n[i][f] = v; setFormData({ ...formData, timeline: n }); };
-  const removeDay = (i) => { const n = formData.timeline.filter((_, idx) => idx !== i).map((item, idx) => ({ ...item, day: idx + 1 })); setFormData({ ...formData, timeline: n }); };
-  const handleDayImageUpload = async (i, f) => { const url = await uploadImage(f); updateDay(i, 'image', url); };
-  const addReview = () => setFormData({ ...formData, reviews: [...formData.reviews, { customerName: '', videoUrl: '' }] });
-  const updateReview = (i, f, v) => { const n = [...formData.reviews]; n[i][f] = v; setFormData({ ...formData, reviews: n }); };
-  const removeReview = (i) => { const n = formData.reviews.filter((_, idx) => idx !== i); setFormData({ ...formData, reviews: n }); };
+
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
 
-      {/* ✅ UPDATED TABS */}
-      <div className="flex gap-6 border-b mb-8 overflow-x-auto">
-        {['tours', 'bookings', 'messages', 'reviews'].map(tab => (
+      {/* ✅ UPDATED TABS - Removed Bookings */}
+      <div className="flex gap-6 border-b mb-8 overflow-x-auto bg-white p-4 rounded-lg shadow-sm">
+        {['tours', 'messages', 'reviews'].map(tab => (
           <button
             key={tab}
-            className={`pb-2 px-2 text-lg font-medium capitalize whitespace-nowrap ${activeTab === tab ? 'border-b-4 border-primary text-primary' : 'text-gray-500'}`}
+            className={`pb-2 px-4 text-lg font-medium capitalize whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-4 border-primary text-primary font-bold' : 'text-gray-500 hover:text-gray-700'}`}
             onClick={() => setActiveTab(tab)}
           >
             {tab}
@@ -181,79 +164,112 @@ const AdminDashboard = () => {
       {/* --- TAB 1: TOURS --- */}
       {activeTab === 'tours' && (
         <div>
-          <button onClick={() => { cancelEdit(); setShowAddForm(!showAddForm); }} className="bg-green-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 mb-6 font-semibold shadow-md">
-            <FaPlus /> {showAddForm ? 'Close Form' : 'Add New Tour'}
-          </button>
+          {!showAddForm && (
+            <button onClick={() => { cancelEdit(); setShowAddForm(true); }} className="bg-primary text-white px-6 py-3 rounded-lg flex items-center gap-2 mb-6 font-bold shadow-lg hover:bg-orange-600 transition">
+              <FaPlus /> Add New Tour
+            </button>
+          )}
 
           {showAddForm && (
-            <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-700">{editingId ? 'Edit Tour Package' : 'Create New Package'}</h3>
-                <button onClick={cancelEdit} className="text-gray-500 hover:text-red-500 font-bold">Cancel</button>
+            <div className="bg-white p-8 rounded-xl shadow-2xl mb-12 border border-gray-100 max-w-5xl mx-auto">
+              {/* Form Header */}
+              <div className="flex justify-between items-center mb-8 border-b pb-4">
+                <h3 className="text-2xl font-bold text-gray-800">{editingId ? 'Edit Tour Package' : 'Create New Package'}</h3>
+                <button onClick={cancelEdit} className="text-gray-500 hover:text-red-500 font-bold px-4 py-2 rounded hover:bg-red-50 transition">Cancel</button>
               </div>
-              <form onSubmit={handleSubmitTour} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input placeholder="Tour Title" className="border p-3 rounded" value={formData.title} required onChange={e => setFormData({ ...formData, title: e.target.value })} />
-                  <input placeholder="Destination" className="border p-3 rounded" value={formData.destination} required onChange={e => setFormData({ ...formData, destination: e.target.value })} />
-                  <input placeholder="Duration" className="border p-3 rounded" value={formData.duration} required onChange={e => setFormData({ ...formData, duration: e.target.value })} />
-                  <input type="number" placeholder="Price" className="border p-3 rounded" value={formData.price} required onChange={e => setFormData({ ...formData, price: e.target.value })} />
-                  <textarea placeholder="Description" className="border p-3 rounded md:col-span-2" value={formData.desc} required onChange={e => setFormData({ ...formData, desc: e.target.value })}></textarea>
-                </div>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <textarea placeholder="Inclusions (Comma separated)" className="border p-3 rounded" value={formData.inclusions} onChange={e => setFormData({ ...formData, inclusions: e.target.value })}></textarea>
-                  <textarea placeholder="Exclusions (Comma separated)" className="border p-3 rounded" value={formData.exclusions} onChange={e => setFormData({ ...formData, exclusions: e.target.value })}></textarea>
-                </div>
-                <div className="border-2 border-dashed p-4 rounded bg-gray-50 text-center">
-                  <label className="block mb-2 font-bold">Main Cover Image</label>
-                  <input type="file" onChange={handleMainImageUpload} className="block w-full text-sm mx-auto" />
-                  {formData.mainImage && <img src={formData.mainImage} alt="Preview" className="h-20 mx-auto mt-2 rounded" />}
-                </div>
 
-                {/* ITINERARY */}
-                <div className="bg-gray-50 p-4 rounded-lg border">
-                  <h4 className="text-lg font-bold mb-4 flex items-center gap-2"><FaCalendarDay /> Day-wise Itinerary</h4>
-                  {formData.timeline.map((day, index) => (
-                    <div key={index} className="flex flex-col md:flex-row gap-2 mb-3 bg-white p-3 rounded border items-start">
-                      <span className="font-bold pt-3 w-16 text-primary">Day {day.day}</span>
-                      <div className="flex-1 w-full space-y-2">
-                        <input placeholder="Title" className="border p-2 rounded w-full" value={day.title} onChange={(e) => updateDay(index, 'title', e.target.value)} required />
-                        <textarea placeholder="Description" className="border p-2 rounded w-full" value={day.desc} onChange={(e) => updateDay(index, 'desc', e.target.value)} required />
+              <form onSubmit={handleSubmitTour} className="space-y-8">
+
+                {/* Section 1: Basic Info */}
+                <section>
+                  <h4 className="text-lg font-bold text-primary mb-4 uppercase tracking-wide border-l-4 border-primary pl-3">Basic Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Tour Title</label>
+                      <input placeholder="e.g. Majestic Rajasthan" className="border p-3 rounded w-full focus:ring-2 focus:ring-primary outline-none" value={formData.title} required onChange={e => setFormData({ ...formData, title: e.target.value })} />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Duration</label>
+                      <input placeholder="e.g. 5 Days / 4 Nights" className="border p-3 rounded w-full focus:ring-2 focus:ring-primary outline-none" value={formData.duration} required onChange={e => setFormData({ ...formData, duration: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Destination</label>
+                      <input placeholder="e.g. Jaipur, Udaipur" className="border p-3 rounded w-full focus:ring-2 focus:ring-primary outline-none" value={formData.destination} required onChange={e => setFormData({ ...formData, destination: e.target.value })} />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Price (₹) <span className="text-xs text-gray-400 font-normal">(Optional)</span></label>
+                      <input type="number" placeholder="Optional" className="border p-3 rounded w-full focus:ring-2 focus:ring-primary outline-none" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Category</label>
+                      <select
+                        className="border p-3 rounded w-full focus:ring-2 focus:ring-primary outline-none bg-white"
+                        value={formData.category}
+                        onChange={e => setFormData({ ...formData, category: e.target.value })}
+                      >
+                        <option value="Domestic">Domestic</option>
+                        <option value="International">International</option>
+                      </select>
+                    </div>
+                  </div>
+                </section>
+
+                <hr className="border-gray-100" />
+
+                {/* Section 2: Media & Description */}
+                <section>
+                  <h4 className="text-lg font-bold text-primary mb-4 uppercase tracking-wide border-l-4 border-primary pl-3">Media & Description</h4>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="md:col-span-3">
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Main Cover Image</label>
+                      <div className="border-2 border-dashed p-6 rounded bg-gray-50 text-center hover:bg-gray-100 transition cursor-pointer relative">
+                        <input type="file" onChange={handleMainImageUpload} className="opacity-0 absolute inset-0 w-full h-full cursor-pointer" />
+                        <div className="text-gray-500">
+                          {formData.mainImage ? <img src={formData.mainImage} alt="Preview" className="h-32 w-full object-cover rounded mx-auto" /> : <><FaPlus className="mx-auto mb-2" /> Upload Image</>}
+                        </div>
                       </div>
-                      <div className="w-full md:w-auto"><input type="file" className="text-xs" onChange={(e) => handleDayImageUpload(index, e.target.files[0])} />{day.image && <span className="text-xs text-green-600 font-bold block">Image Set ✓</span>}</div>
-                      <button type="button" onClick={() => removeDay(index)} className="text-red-500 p-2"><FaTrash /></button>
                     </div>
-                  ))}
-                  <button type="button" onClick={addDay} className="bg-blue-100 text-blue-600 px-4 py-2 rounded font-bold text-sm hover:bg-blue-200">+ Add Day</button>
-                </div>
+                  </div>
 
-                {/* REVIEWS */}
-                <div className="bg-gray-50 p-4 rounded-lg border">
-                  <h4 className="text-lg font-bold mb-4 flex items-center gap-2"><FaVideo /> Video Reviews</h4>
-                  {formData.reviews.map((review, index) => (
-                    <div key={index} className="flex gap-2 mb-2 bg-white p-2 rounded border items-center">
-                      <input placeholder="Name" className="border p-2 rounded w-1/3" value={review.customerName} onChange={(e) => updateReview(index, 'customerName', e.target.value)} />
-                      <input placeholder="YouTube Link" className="border p-2 rounded flex-1" value={review.videoUrl} onChange={(e) => updateReview(index, 'videoUrl', e.target.value)} />
-                      <button type="button" onClick={() => removeReview(index)} className="text-red-500 p-2"><FaTrash /></button>
-                    </div>
-                  ))}
-                  <button type="button" onClick={addReview} className="bg-blue-100 text-blue-600 px-4 py-2 rounded font-bold text-sm hover:bg-blue-200">+ Add Review</button>
-                </div>
+                </section>
 
-                <button type="submit" className="bg-primary hover:bg-blue-600 text-white py-3 rounded-lg font-bold w-full shadow-md">{editingId ? 'Update Tour Package' : 'Create Tour Package'}</button>
+
+
+                <div className="pt-6">
+                  <button type="submit" className="bg-secondary hover:bg-orange-600 text-white py-4 rounded-xl font-bold w-full shadow-lg text-lg transition transform hover:scale-[1.01]">
+                    {editingId ? 'Update Tour Package' : 'Create Tour Package'}
+                  </button>
+                </div>
               </form>
             </div>
           )}
 
-          <div className="bg-white rounded shadow overflow-hidden">
+          {/* Tours List Table */}
+          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
             <table className="w-full text-left">
-              <thead className="bg-gray-100"><tr><th className="p-4">Title</th><th className="p-4">Price</th><th className="p-4">Status</th><th className="p-4">Actions</th></tr></thead>
-              <tbody>
+              <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider">
+                <tr>
+                  <th className="p-4 border-b">Title</th>
+                  <th className="p-4 border-b">Price</th>
+                  <th className="p-4 border-b">Status</th>
+                  <th className="p-4 border-b">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
                 {tours.map(tour => (
-                  <tr key={tour._id} className={`border-b ${tour.isArchived ? 'bg-gray-100 opacity-75' : ''}`}>
-                    <td className="p-4 font-medium">{tour.title} {tour.isArchived && <span className="text-xs bg-gray-600 text-white px-2 py-0.5 rounded ml-2">Archived</span>}</td>
-                    <td className="p-4">₹{tour.price}</td>
-                    <td className="p-4"><button onClick={() => handleArchiveToggle(tour)} className={`text-sm font-bold flex items-center gap-1 ${tour.isArchived ? 'text-gray-500' : 'text-green-600'}`}>{tour.isArchived ? <><FaUndo /> Unarchive</> : <><FaArchive /> Archive</>}</button></td>
-                    <td className="p-4 flex gap-3"><button onClick={() => handleEditClick(tour)} className="text-blue-500 hover:text-blue-700" title="Edit"><FaEdit size={18} /></button><button onClick={() => handleDeleteTour(tour._id)} className="text-red-500 hover:text-red-700" title="Delete"><FaTrash size={18} /></button></td>
+                  <tr key={tour._id} className={`hover:bg-gray-50 transition ${tour.isArchived ? 'bg-gray-50 opacity-60' : ''}`}>
+                    <td className="p-4 font-medium text-gray-800">
+                      {tour.title}
+                      <span className={`text-[10px] px-2 py-1 rounded-full ml-2 uppercase tracking-wide ${tour.category === 'International' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{tour.category}</span>
+                    </td>
+                    <td className="p-4 font-bold text-gray-600">{tour.price ? `₹${tour.price.toLocaleString()}` : <span className="text-gray-400 italic text-xs">Not Set</span>}</td>
+                    <td className="p-4"><button onClick={() => handleArchiveToggle(tour)} className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 w-fit ${tour.isArchived ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'}`}>{tour.isArchived ? 'Archived' : 'Active'}</button></td>
+                    <td className="p-4 flex gap-3">
+                      <button onClick={() => handleEditClick(tour)} className="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded hover:bg-blue-100 transition" title="Edit"><FaEdit size={16} /></button>
+                      <button onClick={() => handleDeleteTour(tour._id)} className="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded hover:bg-red-100 transition" title="Delete"><FaTrash size={16} /></button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -262,44 +278,30 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* --- TAB 2: BOOKINGS --- */}
-      {activeTab === 'bookings' && (
-        <div className="bg-white rounded shadow overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-100"><tr><th className="p-4">Customer</th><th className="p-4">Tour</th><th className="p-4">Status</th><th className="p-4">Actions</th></tr></thead>
-            <tbody>
-              {bookings.length > 0 ? bookings.map(b => (
-                <tr key={b._id} className="border-b hover:bg-gray-50">
-                  <td className="p-4">{b.fullName}<br /><span className="text-xs text-gray-500">{b.email}</span></td>
-                  <td className="p-4">{b.tour?.title || 'Unknown Tour'}</td>
-                  <td className="p-4"><span className={`px-2 py-1 rounded text-xs font-bold uppercase ${b.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{b.status}</span></td>
-                  <td className="p-4 flex gap-2">
-                    {b.status === 'pending' && (<><button onClick={() => handleStatusChange(b._id, 'approved')} className="text-green-500"><FaCheck /></button><button onClick={() => handleStatusChange(b._id, 'cancelled')} className="text-red-500"><FaTimes /></button></>)}
-                  </td>
-                </tr>
-              )) : <tr><td colSpan="4" className="p-8 text-center text-gray-500">No bookings found.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* --- TAB 3: MESSAGES --- */}
+      {/* --- TAB 3: MESSAGES (Refactored) --- */}
       {activeTab === 'messages' && (
-        <div className="bg-white rounded shadow overflow-hidden">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
           <table className="w-full text-left">
-            <thead className="bg-gray-100"><tr><th className="p-4">Name / Category</th><th className="p-4">Message</th><th className="p-4">Date</th></tr></thead>
-            <tbody>
+            <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider">
+              <tr>
+                <th className="p-4 border-b">Contact Info</th>
+                <th className="p-4 border-b">Message</th>
+                <th className="p-4 border-b hidden md:table-cell">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
               {contacts.length > 0 ? contacts.map(c => (
-                <tr key={c._id} className="border-b hover:bg-gray-50">
-                  <td className="p-4">
-                    <p className="font-bold text-gray-800">{c.name}</p>
-                    <span className={`text-xs px-2 py-1 rounded ${c.category === 'Suggestion' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}>{c.category}</span>
-                    <p className="text-xs text-gray-500 mt-1">{c.email}</p>
+                <tr key={c._id} className="hover:bg-gray-50 transition">
+                  <td className="p-4 align-top">
+                    <p className="font-bold text-gray-900">{c.name}</p>
+                    <a href={`mailto:${c.email}`} className="text-sm text-blue-600 hover:underline block mb-1">{c.email}</a>
+                    <span className={`text-[10px] px-2 py-0.5 rounded border ${c.category === 'Suggestion' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-600'}`}>{c.category}</span>
                   </td>
-                  <td className="p-4 max-w-lg">
-                    <p className="text-gray-700 text-sm whitespace-pre-wrap">{c.message}</p>
+                  <td className="p-4 align-top">
+                    <p className="text-gray-700 text-sm whitespace-pre-wrap leading-relaxed">{c.message}</p>
+                    <div className="md:hidden text-xs text-gray-400 mt-2">{new Date(c.createdAt).toLocaleDateString()}</div>
                   </td>
-                  <td className="p-4 text-sm text-gray-500">
+                  <td className="p-4 align-top text-sm text-gray-500 hidden md:table-cell whitespace-nowrap">
                     {new Date(c.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
@@ -309,19 +311,26 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* --- TAB 5: REVIEWS (✅ NEW) --- */}
+      {/* --- TAB 4: REVIEWS --- */}
       {activeTab === 'reviews' && (
-        <div className="bg-white rounded shadow overflow-hidden">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
           <table className="w-full text-left">
-            <thead className="bg-gray-100"><tr><th className="p-4">User</th><th className="p-4">Rating</th><th className="p-4">Comment</th><th className="p-4">Action</th></tr></thead>
-            <tbody>
+            <thead className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider">
+              <tr>
+                <th className="p-4 border-b">User</th>
+                <th className="p-4 border-b">Rating</th>
+                <th className="p-4 border-b">Comment</th>
+                <th className="p-4 border-b">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
               {reviews.length > 0 ? reviews.map(r => (
-                <tr key={r._id} className="border-b hover:bg-gray-50">
-                  <td className="p-4 font-bold">{r.name}</td>
-                  <td className="p-4 flex text-yellow-500">{[...Array(r.rating)].map((_, i) => <FaStar key={i} size={14} />)}</td>
+                <tr key={r._id} className="hover:bg-gray-50 transition">
+                  <td className="p-4 font-bold text-gray-800">{r.name}</td>
+                  <td className="p-4"><div className="flex text-yellow-400">{[...Array(r.rating)].map((_, i) => <FaStar key={i} size={14} />)}</div></td>
                   <td className="p-4 italic text-gray-600">"{r.comment}"</td>
                   <td className="p-4">
-                    <button onClick={() => handleDeleteReview(r._id)} className="text-red-500 hover:text-red-700 flex items-center gap-1 font-bold text-xs border border-red-200 px-2 py-1 rounded hover:bg-red-50">
+                    <button onClick={() => handleDeleteReview(r._id)} className="text-red-500 hover:text-red-700 flex items-center gap-1 font-bold text-xs border border-red-200 px-3 py-1.5 rounded hover:bg-red-50 transition">
                       <FaTrash /> Delete
                     </button>
                   </td>

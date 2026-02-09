@@ -7,7 +7,6 @@ import 'react-toastify/dist/ReactToastify.css';
 // Pages
 import Home from './pages/Home';
 import Tours from './pages/Tours';
-import TourDetails from './pages/TourDetails';
 import AdminDashboard from './pages/AdminDashboard';
 import Contact from './pages/Contact';
 import TermsConditions from './pages/TermsConditions';
@@ -22,7 +21,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/tours" element={<Tours />} />
-            <Route path="/tours/:id" element={<TourDetails />} />
+            <Route path="/tours" element={<Tours />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />

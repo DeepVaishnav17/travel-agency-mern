@@ -17,13 +17,19 @@ const Tours = () => {
       try {
         // ✅ 1. Determine URL: If searching, send query to backend
         const url = searchQuery ? `/tours?search=${searchQuery}` : '/tours';
-        
+
         const res = await api.get(url);
 
-        // ✅ 2. Filter out Archived tours (Keep your existing logic)
-        // Note: Even if backend returns search results, we hide archived ones here
-        const activeTours = res.data.filter(tour => !tour.isArchived);
-        
+        // ✅ 2. Filter out Archived tours AND filter by Category if present
+        const categoryQuery = searchParams.get('category');
+
+        const activeTours = res.data.filter(tour => {
+          if (tour.isArchived) return false;
+          // If category param exists, match it. Otherwise align with all.
+          if (categoryQuery && tour.category !== categoryQuery) return false;
+          return true;
+        });
+
         setTours(activeTours);
       } catch (err) {
         console.error("Error fetching tours:", err);
@@ -37,16 +43,16 @@ const Tours = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      
+
       {/* Dynamic Header */}
       <h1 className="text-4xl font-bold text-center mb-4 text-gray-800">
         {searchQuery ? `Search Results for "${searchQuery}"` : "All Tour Packages"}
       </h1>
-      
+
       {/* ✅ UPDATED: Shows exact count of found tours */}
       <p className="text-center text-gray-500 mb-12 max-w-2xl mx-auto">
-        {searchQuery 
-          ? `We found ${tours.length} trip(s) matching your search.` 
+        {searchQuery
+          ? `We found ${tours.length} trip(s) matching your search.`
           : "Choose from our wide range of premium tour packages tailored for every traveler."}
       </p>
 
@@ -60,22 +66,22 @@ const Tours = () => {
             ))
           ) : (
             <div className="col-span-3 text-center py-12 text-gray-500">
-                <h3 className="text-2xl font-bold mb-2">No tours found.</h3>
-                <p>
-                    {searchQuery 
-                        ? `We couldn't find any tours matching "${searchQuery}".` 
-                        : "Please check back later for new packages!"}
-                </p>
-                
-                {/* Show 'View All' button only if user was searching */}
-                {searchQuery && (
-                    <button 
-                        onClick={() => window.location.href='/tours'} 
-                        className="mt-6 bg-primary text-white px-6 py-2 rounded-full hover:bg-orange-600 transition"
-                    >
-                        View All Tours
-                    </button>
-                )}
+              <h3 className="text-2xl font-bold mb-2">No tours found.</h3>
+              <p>
+                {searchQuery
+                  ? `We couldn't find any tours matching "${searchQuery}".`
+                  : "Please check back later for new packages!"}
+              </p>
+
+              {/* Show 'View All' button only if user was searching */}
+              {searchQuery && (
+                <button
+                  onClick={() => window.location.href = '/tours'}
+                  className="mt-6 bg-primary text-white px-6 py-2 rounded-full hover:bg-orange-600 transition"
+                >
+                  View All Tours
+                </button>
+              )}
             </div>
           )}
         </div>
