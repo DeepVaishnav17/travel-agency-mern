@@ -1,10 +1,13 @@
+import SEO from '../components/SEO';
+
 const TermsConditions = () => {
   return (
     <div className="bg-gray-50 min-h-screen py-12">
+      <SEO title="Terms & Conditions" description="Read our terms and conditions for booking, cancellations, and user responsibilities." />
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
           <h1 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">Terms & Conditions</h1>
-          
+
           <div className="space-y-6 text-gray-600 leading-relaxed">
             <p className="text-sm text-gray-400">Last Updated: {new Date().toLocaleDateString()}</p>
 

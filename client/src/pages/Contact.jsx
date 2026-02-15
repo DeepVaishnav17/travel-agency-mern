@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
+import SEO from '../components/SEO';
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaPaperPlane, FaLightbulb } from 'react-icons/fa';
 
 const Contact = () => {
@@ -38,6 +39,12 @@ const Contact = () => {
 
   return (
     <div className="bg-white min-h-screen pt-20">
+      <SEO
+        title="Contact Us"
+        description="Get in touch with Deep Tours & Travels for bookings, inquiries, or customizations. We are here to help you."
+        keywords="contact deep tours, travel agency contact, booking inquiry"
+        url="/contact"
+      />
 
       {/* Header Section */}
       <div className="py-24 bg-gray-50 text-center relative overflow-hidden">

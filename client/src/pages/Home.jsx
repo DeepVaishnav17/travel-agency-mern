@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
+import SEO from '../components/SEO';
 import HeroSection from '../components/HeroSection';
 import FeaturedTours from '../components/FeaturedTours';
 import WhyChooseUs from '../components/WhyChooseUs';
@@ -102,6 +103,27 @@ const Home = () => {
 
   return (
     <div className="flex flex-col w-full">
+      <SEO
+        title="Home"
+        description="Discover the best tour packages with Deep Tours & Travels. Domestic and international holidays curated for you."
+        keywords="travel agency, tour packages, holiday packages, deep tours, travel"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "TravelAgency",
+          "name": "Deep Tours & Travels",
+          "image": "https://deeptourstravels.com/logo.png",
+          "uRL": "https://deeptourstravels.com",
+          "telephone": "+919979120728",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Radheshyam Complex, Madhav Darshan",
+            "addressLocality": "Bhavnagar",
+            "addressRegion": "Gujarat",
+            "postalCode": "364001",
+            "addressCountry": "IN"
+          }
+        }}
+      />
       {sortedLayout.map((section, index) => renderSection(section, index))}
     </div>
   );

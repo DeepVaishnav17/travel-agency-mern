@@ -1,6 +1,9 @@
+import SEO from '../components/SEO';
+
 const PrivacyPolicy = () => {
   return (
     <div className="bg-gray-50 min-h-screen py-12">
+        <SEO title="Privacy Policy" description="Read our privacy policy to understand how we collect, use, and protect your information." />
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
           <h1 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">Privacy Policy</h1>

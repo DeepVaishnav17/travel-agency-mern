@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaPlane, FaHotel, FaCar, FaPassport, FaUmbrella, FaGlobeAmericas, FaHiking, FaShip, FaSuitcaseRolling } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import SEO from '../components/SEO';
 
 const Services = () => {
     const services = [
@@ -79,6 +80,12 @@ const Services = () => {
 
     return (
         <div className="min-h-screen bg-white font-sans text-gray-900 pt-20">
+            <SEO
+                title="Our Services"
+                description="From flight bookings to visa assistance, we offer a wide range of travel services to make your journey seamless."
+                keywords="flight booking, hotel booking, visa assistance, travel insurance, custom tours"
+                url="/services"
+            />
 
             {/* HERO SECTION - Immersive Gradient */}
             <div className="relative py-24 px-6 text-center overflow-hidden">

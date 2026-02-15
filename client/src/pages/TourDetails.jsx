@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../utils/api';
+import SEO from '../components/SEO';
 import { FaClock, FaMapMarkerAlt, FaFilePdf, FaArrowLeft, FaStar, FaGlobe, FaPlane } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
@@ -32,6 +33,25 @@ const TourDetails = () => {
 
     return (
         <div className="bg-white min-h-screen">
+            <SEO
+                title={tour.title}
+                description={tour.desc ? tour.desc.substring(0, 160) : `Book ${tour.title} with Deep Tours & Travels.`}
+                image={tour.mainImage}
+                url={`/tours/${tour._id}`}
+                schema={{
+                    "@context": "https://schema.org",
+                    "@type": "Product",
+                    "name": tour.title,
+                    "image": tour.mainImage,
+                    "description": tour.desc,
+                    "offers": {
+                        "@type": "Offer",
+                        "priceCurrency": "INR",
+                        "price": tour.price,
+                        "availability": "https://schema.org/InStock"
+                    }
+                }}
+            />
 
             {/* HERO SECTION */}
             <div className="relative h-[60vh] md:h-[80vh] w-full overflow-hidden">

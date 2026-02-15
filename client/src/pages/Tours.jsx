@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
+import SEO from '../components/SEO';
 import TourCard from '../components/TourCard';
 import { FaPlaneDeparture, FaSearch } from 'react-icons/fa';
 
@@ -37,6 +38,12 @@ const Tours = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20"> {/* pt-20 for navbar */}
+      <SEO
+        title={searchQuery ? `Search Results for "${searchQuery}"` : (catQuery ? `${catQuery} Tours` : "All Tours")}
+        description="Explore our wide range of domestic and international tour packages. Find your perfect holiday destination with Deep Tours & Travels."
+        keywords="tours, travel packages, holiday destinations, domestic tours, international tours"
+        url="/tours"
+      />
 
       {/* --- PAGE HEADER --- */}
       <div className="relative bg-primary text-white py-20 px-6 mb-16 overflow-hidden">

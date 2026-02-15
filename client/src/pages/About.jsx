@@ -1,10 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlay } from 'react-icons/fa';
+import SEO from '../components/SEO';
 
 const About = () => {
     return (
         <div className="bg-white text-gray-800 font-sans antialiased pt-20">
+            <SEO
+                title="About Us"
+                description="Learn about our journey, our values, and why Deep Tours & Travels is the best choice for your next adventure."
+                keywords="about deep tours, travel agency story, experienced tour operators"
+                url="/about"
+            />
             {/* Header Section */}
             <div className="max-w-7xl mx-auto px-6 py-20 text-center">
                 <span className="text-primary font-bold tracking-[0.3em] uppercase text-sm mb-4 block animate-pulse">Our Story</span>

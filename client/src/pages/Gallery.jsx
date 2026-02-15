@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
+import SEO from '../components/SEO';
 
 const Gallery = () => {
     const [images, setImages] = useState([]);
@@ -56,6 +57,12 @@ const Gallery = () => {
 
     return (
         <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-purple-200 selection:text-primary pt-20">
+            <SEO
+                title="Gallery"
+                description="View vivid snapshots of our happy travelers and beautiful destinations. Get inspired for your next trip."
+                keywords="travel gallery, tour photos, happy travelers, destination images"
+                url="/gallery"
+            />
 
 
             {/* STICKY INTERNAL NAVBAR */
