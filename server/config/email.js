@@ -2,17 +2,17 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// ✅ FIX: Force IPv4 and use Gmail Service (Best for Render)
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  family: 4 // ✅ FORCE IPv4: This prevents the connection timeout!
+  family: 4
 });
 
-// 1. Send Booking Confirmation to CUSTOMER
+
 const sendBookingEmail = async (userEmail, tourName, fullName) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -30,11 +30,11 @@ const sendBookingEmail = async (userEmail, tourName, fullName) => {
   return transporter.sendMail(mailOptions);
 };
 
-// 2. Send Booking Alert to ADMIN
+
 const sendAdminBookingAlert = async (details) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER, 
+    to: process.env.EMAIL_USER,
     subject: `New Inquiry: ${details.tourName}`,
     html: `
       <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd;">
@@ -54,7 +54,7 @@ const sendAdminBookingAlert = async (details) => {
   return transporter.sendMail(mailOptions);
 };
 
-// 3. Contact Email
+
 const sendContactEmail = async (data) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,

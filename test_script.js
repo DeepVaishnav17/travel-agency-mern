@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const API_URL = 'http://127.0.0.1:5000/api';
-const ADMIN_KEY = 'my-secret-admin-key '; // Added space to test trim fix
+const ADMIN_KEY = 'my-secret-admin-key ';
 
 async function test() {
     try {
@@ -22,7 +22,7 @@ async function test() {
         console.log('Verify Status:', verify.status);
         if (!verify.ok) {
             console.log('Verify Response:', await verify.text());
-            // context: auth might be failing
+
         }
 
         console.log('2. Testing Tour Create...');
@@ -46,7 +46,7 @@ async function test() {
         const tourText = await tourRes.text();
         console.log('Tour Create Response:', tourText);
 
-        // 3. Testing Image Upload
+
         console.log('3. Testing Image Upload...');
         const formData = new FormData();
         const jpgBlob = new Blob(['fake jpg header'], { type: 'image/jpeg' });

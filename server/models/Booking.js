@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Can be null if guest
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   fullName: { type: String, required: true },
   email: { type: String, required: true },
   phone: { type: String, required: true },
@@ -9,10 +9,10 @@ const bookingSchema = new mongoose.Schema({
   travelDate: { type: Date, required: true },
   travelers: { type: Number, required: true, min: 1 },
   totalPrice: { type: Number, required: true },
-  status: { 
-    type: String, 
-    enum: ['pending', 'approved', 'cancelled'], 
-    default: 'pending' 
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'cancelled'],
+    default: 'pending'
   }
 }, { timestamps: true });
 

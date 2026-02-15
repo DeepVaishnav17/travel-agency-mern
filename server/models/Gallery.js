@@ -11,11 +11,11 @@ const gallerySchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        default: 'Happy Travelers' // Can be 'Domestic', 'International', etc. later
+        default: 'Happy Travelers'
     },
     isFeatured: {
         type: Boolean,
-        default: false // Determines if it shows up on the Home page
+        default: false
     }
 }, { timestamps: true });
 

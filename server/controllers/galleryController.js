@@ -1,9 +1,7 @@
 const Gallery = require('../models/Gallery');
 const { cloudinary } = require('../config/cloudinary');
 
-// @desc    Get all gallery images
-// @route   GET /api/gallery
-// @access  Public
+
 const getGallery = async (req, res) => {
     try {
         const images = await Gallery.find().sort({ createdAt: -1 });
@@ -13,9 +11,7 @@ const getGallery = async (req, res) => {
     }
 };
 
-// @desc    Add new image
-// @route   POST /api/gallery
-// @access  Private/Admin
+
 const addImage = async (req, res) => {
     try {
         const { title, category, isFeatured } = req.body;
@@ -29,7 +25,7 @@ const addImage = async (req, res) => {
             category,
             isFeatured: isFeatured === 'true',
             imageUrl: req.file.path,
-            publicId: req.file.filename // Saved from Cloudinary
+            publicId: req.file.filename
         });
 
         const savedImage = await newImage.save();
@@ -40,9 +36,6 @@ const addImage = async (req, res) => {
     }
 };
 
-// @desc    Delete image
-// @route   DELETE /api/gallery/:id
-// @access  Private/Admin
 const deleteImage = async (req, res) => {
     try {
         const image = await Gallery.findById(req.params.id);
@@ -51,7 +44,7 @@ const deleteImage = async (req, res) => {
             return res.status(404).json({ message: 'Image not found' });
         }
 
-        // Delete from Cloudinary (Attempt only)
+
         try {
             if (image.publicId) {
                 await cloudinary.uploader.destroy(image.publicId);
@@ -60,11 +53,11 @@ const deleteImage = async (req, res) => {
             console.error("Cloudinary delete failed (ignoring to allow DB delete):", err);
         }
 
-        // Delete from DB (Always)
+
         if (image.deleteOne) {
             await image.deleteOne();
         } else {
-            // Fallback for older Mongoose versions
+
             await Gallery.findByIdAndDelete(req.params.id);
         }
 

@@ -1,5 +1,5 @@
 const Contact = require('../models/Contact');
-const { sendContactEmail } = require('../config/email'); // Import the specific email function
+const { sendContactEmail } = require('../config/email');
 
 
 const submitContact = async (req, res) => {

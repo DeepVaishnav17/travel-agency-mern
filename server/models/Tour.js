@@ -7,10 +7,10 @@ const tourSchema = new mongoose.Schema({
   price: { type: Number, required: false },
   desc: { type: String, required: false },
 
-  // Main Cover Image
+
   mainImage: { type: String, required: false },
 
-  // Timeline (Day-wise Itinerary)
+
   timeline: [{
     day: Number,
     title: String,
@@ -18,24 +18,24 @@ const tourSchema = new mongoose.Schema({
     image: String
   }],
 
-  // Video Reviews
+
   reviews: [{
     customerName: String,
     videoUrl: String
   }],
 
-  // Details
+
   inclusions: [String],
   exclusions: [String],
 
-  category: { type: String, default: 'Domestic' }, // ✅ Added Category
+  category: { type: String, default: 'Domestic' },
 
   isFeatured: { type: Boolean, default: false },
 
-  // ✅ NEW FIELD: Brochure (PDF)
+
   brochure: { type: String, required: false },
 
-  // ✅ NEW FIELD: ARCHIVE SUPPORT
+
   isArchived: { type: Boolean, default: false }
 }, { timestamps: true });
 

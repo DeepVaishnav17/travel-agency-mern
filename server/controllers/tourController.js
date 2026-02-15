@@ -1,15 +1,14 @@
 const Tour = require('../models/Tour');
 
-// @desc    Get all tours (Searchable)
-// @route   GET /api/tours?search=keyword
+
 const getTours = async (req, res) => {
   try {
     const { search } = req.query;
 
-    // Build query object
+
     let query = {};
 
-    // If a search term exists, filter by Title OR Destination (case-insensitive)
+
     if (search) {
       query = {
         $or: [
@@ -19,7 +18,7 @@ const getTours = async (req, res) => {
       };
     }
 
-    // Default: Sort by newest first
+
     const tours = await Tour.find(query).sort({ createdAt: -1 });
     res.json(tours);
   } catch (error) {
@@ -27,8 +26,7 @@ const getTours = async (req, res) => {
   }
 };
 
-// @desc    Get single tour
-// @route   GET /api/tours/:id
+
 const getTourById = async (req, res) => {
   try {
     const tour = await Tour.findById(req.params.id);
@@ -39,8 +37,7 @@ const getTourById = async (req, res) => {
   }
 };
 
-// @desc    Create a tour (Admin)
-// @route   POST /api/tours
+
 const createTour = async (req, res) => {
   const tourData = req.body;
   console.log('[TourController] Creating Tour with data:', JSON.stringify(tourData, null, 2));
@@ -55,8 +52,7 @@ const createTour = async (req, res) => {
   }
 };
 
-// @desc    Update a tour (Admin)
-// @route   PUT /api/tours/:id
+
 const updateTour = async (req, res) => {
   try {
     const updatedTour = await Tour.findByIdAndUpdate(
@@ -75,8 +71,7 @@ const updateTour = async (req, res) => {
   }
 };
 
-// @desc    Delete a tour (Admin)
-// @route   DELETE /api/tours/:id
+
 const deleteTour = async (req, res) => {
   try {
     const tour = await Tour.findById(req.params.id);

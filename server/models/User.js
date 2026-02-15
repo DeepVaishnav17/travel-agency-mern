@@ -11,11 +11,11 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ FIXED: Removed 'next' parameter and calls
+
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
-  
-  // Hash the password
+
+
   this.password = await bcrypt.hash(this.password, 10);
 });
 

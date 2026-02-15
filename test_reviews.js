@@ -27,7 +27,7 @@ async function testReviews() {
 
         const newReview = JSON.parse(text);
 
-        // Cleanup (requires admin key) - assuming we have it from previous steps
+
         const ADMIN_KEY = 'my-secret-admin-key';
         console.log('3. Deleting Test Review...');
         const delRes = await fetch(`${API_URL}/reviews/${newReview._id}`, {

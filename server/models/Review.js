@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // User's name
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }, // Link to user account (Optional for guests)
+  name: { type: String, required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
   rating: { type: Number, required: true, min: 1, max: 5 },
   comment: { type: String, required: true },
 }, { timestamps: true });

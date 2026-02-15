@@ -1,18 +1,18 @@
 const mongoose = require('mongoose');
 
 const siteConfigSchema = new mongoose.Schema({
-  // Dynamic Homepage Banners
+
   banners: [{
     imageUrl: String,
     title: String,
     subtitle: String
   }],
-  // Dynamic Contact Details
+
   contactEmail: String,
   contactPhone: String,
   contactAddress: String,
   homeLayout: {
-    type: Array, // [{ id: 'hero', label: 'Hero', isVisible: true, order: 1 }]
+    type: Array,
     default: [
       { id: 'hero', label: 'Hero Section', isVisible: true, order: 1 },
       { id: 'domestic', label: 'Domestic Tours', isVisible: true, order: 2 },

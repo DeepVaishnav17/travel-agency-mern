@@ -15,15 +15,14 @@ const getSiteConfig = async (req, res) => {
   }
 };
 
-// @desc    Update site config (Admin)
-// @route   PUT /api/config
+
 const updateSiteConfig = async (req, res) => {
   try {
     let config = await SiteConfig.findOne();
     if (!config) {
       config = new SiteConfig(req.body);
     } else {
-      // Update existing fields
+
       config.banners = req.body.banners || config.banners;
       config.contactEmail = req.body.contactEmail || config.contactEmail;
       config.contactPhone = req.body.contactPhone || config.contactPhone;
