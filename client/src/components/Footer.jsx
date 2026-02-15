@@ -8,17 +8,17 @@
 //   return (
 //     <footer className="bg-gray-900 text-white pt-16 pb-8 mt-auto border-t border-gray-800">
 //       <div className="container mx-auto px-4">
-        
+
 //         {/* --- MAIN GRID LAYOUT --- */}
 //         <div className="grid md:grid-cols-3 gap-12 mb-12">
-          
+
 //           {/* COLUMN 1: Brand & Socials */}
 //           <div className="space-y-6">
 //             <div>
 //                 <h2 className="text-3xl font-bold text-primary tracking-wider">Deep Tours & Travels</h2>
 //                 <p className="text-sm text-gray-400 italic mt-1">Surprise Yourself to Inspire Yourself</p>
 //             </div>
-            
+
 //             <p className="text-gray-400 leading-relaxed text-sm">
 //               Deep Tours & Travels is a premier agency dedicated to creating unforgettable journeys. 
 //               We run by young enthusiasts for social reformation and building the nation with moral values and ethics.
@@ -50,7 +50,7 @@
 //             <ul className="space-y-3 text-gray-400">
 //                 <li><Link to="/" className="hover:text-white transition hover:pl-2 duration-300">Home</Link></li>
 //                 <li><Link to="/tours" className="hover:text-white transition hover:pl-2 duration-300">Tours</Link></li>
-                
+
 //                 {/* ✅ CONDITION: Only show Login/Register if User is NOT logged in */}
 //                 {!token && (
 //                   <>
@@ -66,7 +66,7 @@
 //           {/* COLUMN 3: Contact Details */}
 //           <div>
 //             <h3 className="text-xl font-bold text-orange-500 mb-6 uppercase tracking-wide">Contact</h3>
-            
+
 //             <div className="space-y-4 text-gray-400 text-sm">
 //                 <div>
 //                     <h4 className="text-white font-bold text-lg mb-1">Bhavnagar (Head Office)</h4>
@@ -96,7 +96,7 @@
 //         {/* --- BOTTOM BAR: Copyright & Policies --- */}
 //         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
 //             <p>© {new Date().getFullYear()} Deep Tours & Travels. All rights reserved.</p>
-            
+
 //             <div className="flex gap-6 mt-4 md:mt-0">
 //                 <a href="/privacy-policy" target="_blank" className="hover:text-white transition">Privacy Policy</a>
 //                 <span>•</span>
@@ -110,119 +110,82 @@
 // };
 
 // export default Footer;
-import { FaFacebook, FaInstagram, FaEnvelope, FaMapMarkerAlt, FaPhoneAlt } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaEnvelope, FaMapMarkerAlt, FaPhoneAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
-  // Check if user is logged in
-  const token = localStorage.getItem('token');
-
   return (
-    <footer className="bg-gray-900 text-white pt-16 pb-8 mt-auto border-t border-gray-800">
-      <div className="container mx-auto px-4">
-        
-        {/* --- MAIN GRID LAYOUT --- */}
-        <div className="grid md:grid-cols-3 gap-12 mb-12">
-          
-          {/* COLUMN 1: Brand & Socials */}
-          <div className="space-y-6">
-            <div>
-                <h2 className="text-3xl font-bold text-primary tracking-wider">Deep Tours & Travels</h2>
-                <p className="text-sm text-gray-400 italic mt-1">Surprise Yourself to Inspire Yourself</p>
-            </div>
-            
-            <p className="text-gray-400 leading-relaxed text-sm">
-              Deep Tours & Travels is a premier agency dedicated to creating unforgettable journeys. 
-              We run by young enthusiasts for social reformation and building the nation with moral values and ethics.
+    <footer className="bg-white text-gray-600 border-t border-gray-100 pt-16 pb-8 mt-auto">
+      <div className="container mx-auto px-6">
+
+        <div className="grid md:grid-cols-4 gap-8 md:gap-12 mb-12 md:mb-16">
+
+          {/* Brand */}
+          <div className="col-span-1 md:col-span-1">
+            <Link to="/" className="text-2xl font-bold text-gray-900 tracking-tight mb-4 block">
+              Deep Tours & Travels
+            </Link>
+            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+              Curating unforgettable journeys with a touch of luxury and care. Experience the world like never before.
             </p>
-
-            {/* Social Icons Row */}
             <div className="flex gap-4">
-                {/* Email */}
-                <a href="mailto:hemalvaishnav2007@gmail.com" className="bg-white text-black p-2 rounded-full hover:bg-red-500 hover:text-white transition">
-                    <FaEnvelope size={18} />
+              {[FaFacebook, FaInstagram, FaTwitter, FaLinkedin].map((Icon, idx) => (
+                <a key={idx} href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-primary hover:text-white transition-all duration-300">
+                  <Icon size={14} />
                 </a>
-
-                {/* Location Icon (Clickable Emoji) - ✅ FIXED LINK */}
-                <a 
-                    href="https://www.google.com/maps/search/?api=1&query=Radheshyam+Complex+Bhavnagar+Gujarat" 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="bg-white text-black p-2 rounded-full hover:bg-green-600 hover:text-white transition"
-                    title="View on Map"
-                >
-                    <FaMapMarkerAlt size={18} />
-                </a>
+              ))}
             </div>
           </div>
 
-          {/* COLUMN 2: Quick Links */}
+          {/* Links Column 1 */}
           <div>
-            <h3 className="text-xl font-bold text-orange-500 mb-6 uppercase tracking-wide">Quick Links</h3>
-            <ul className="space-y-3 text-gray-400">
-                <li><Link to="/" className="hover:text-white transition hover:pl-2 duration-300">Home</Link></li>
-                <li><Link to="/tours" className="hover:text-white transition hover:pl-2 duration-300">Tours</Link></li>
-                
-                {/* ✅ CONDITION: Only show Login/Register if User is NOT logged in */}
-                {!token && (
-                  <>
-                    <li><Link to="/login" className="hover:text-white transition hover:pl-2 duration-300">Login</Link></li>
-                    <li><Link to="/register" className="hover:text-white transition hover:pl-2 duration-300">Register</Link></li>
-                  </>
-                )}
+            <h4 className="font-bold text-gray-900 mb-6">Company</h4>
+            <ul className="space-y-3 text-sm">
+              <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
 
-                <li><a href="#" className="hover:text-white transition hover:pl-2 duration-300">Stories</a></li>
+              <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
             </ul>
           </div>
 
-          {/* COLUMN 3: Contact Details */}
+          {/* Links Column 2 */}
           <div>
-            <h3 className="text-xl font-bold text-orange-500 mb-6 uppercase tracking-wide">Contact</h3>
-            
-            <div className="space-y-4 text-gray-400 text-sm">
-                <div>
-                    <h4 className="text-white font-bold text-lg mb-1">Bhavnagar (Head Office)</h4>
-                    
-                    {/* ✅ CLICKABLE ADDRESS (Safe Link) */}
-                    <a 
-                        href="https://www.google.com/maps/search/?api=1&query=Radheshyam+Complex+Bhavnagar+Gujarat"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="hover:text-primary transition block"
-                    >
-                        Radheshyam Complex, Madhavdarshan Complex<br/>Bhavnagar, Gujarat - 364001
-                    </a>
-                </div>
+            <h4 className="font-bold text-gray-900 mb-6">Discover</h4>
+            <ul className="space-y-3 text-sm">
+              <li><Link to="/tours" className="hover:text-primary transition-colors">All Tours</Link></li>
+              <li><Link to="/tours?cat=domestic" className="hover:text-primary transition-colors">Domestic Packages</Link></li>
+              <li><Link to="/tours?cat=international" className="hover:text-primary transition-colors">International Packages</Link></li>
+              <li><Link to="/gallery" className="hover:text-primary transition-colors">Gallery</Link></li>
+            </ul>
+          </div>
 
-                <div>
-                    <p className="font-semibold text-gray-500">Office Timings:</p>
-                    <p>9:00 AM to 7:00 PM</p>
-                </div>
-
-                <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                        <FaPhoneAlt size={12} className="text-primary" /> 
-                        <span>+91 99791 20728</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <FaPhoneAlt size={12} className="text-primary" /> 
-                        <span>+91 87587 98851</span>
-                    </div>
-                </div>
-            </div>
+          {/* Contact */}
+          <div>
+            <h4 className="font-bold text-gray-900 mb-6">Get in Touch</h4>
+            <ul className="space-y-4 text-sm">
+              <li className="flex items-start gap-3">
+                <FaMapMarkerAlt className="text-primary mt-1" />
+                <span>Radheshyam Complex, Bhavnagar,<br />Gujarat - 364001</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <FaPhoneAlt className="text-primary" />
+                <span>+91 99791 20728</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <FaEnvelope className="text-primary" />
+                <span>hemalvaishnav@gmail.com</span>
+              </li>
+            </ul>
           </div>
 
         </div>
 
-        {/* --- BOTTOM BAR: Copyright & Policies --- */}
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-            <p>© {new Date().getFullYear()} Deep Tours & Travels. All rights reserved.</p>
-            
-            <div className="flex gap-6 mt-4 md:mt-0">
-                <a href="/privacy-policy" target="_blank" className="hover:text-white transition">Privacy Policy</a>
-                <span>•</span>
-                <a href="/terms-conditions" target="_blank" className="hover:text-white transition">Terms and Conditions</a>
-            </div>
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
+          <p>&copy; {new Date().getFullYear()} Deep Tours & Travels. All rights reserved.</p>
+          <div className="flex gap-6 mt-4 md:mt-0">
+            <Link to="/privacy-policy" className="hover:text-gray-600 transition">Privacy Policy</Link>
+            <Link to="/terms-conditions" className="hover:text-gray-600 transition">Terms & Conditions</Link>
+          </div>
         </div>
 
       </div>

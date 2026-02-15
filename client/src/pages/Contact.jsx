@@ -9,7 +9,7 @@ const Contact = () => {
     name: '',
     email: '',
     phone: '',
-    category: 'General Inquiry', // Default
+    category: 'General Inquiry',
     message: ''
   });
 
@@ -37,148 +37,171 @@ const Contact = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen pt-12 pb-20">
+    <div className="bg-white min-h-screen pt-20">
 
       {/* Header Section */}
-      <div className="text-center mb-16 px-4">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">Get in Touch</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-          Have a question about a tour? Want to customize your trip?
-          Or maybe you have a <span className="text-secondary font-bold">Suggestion</span> for us?
-          We'd love to hear from you!
-        </p>
+      <div className="py-24 bg-gray-50 text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+          <svg width="100%" height="100%">
+            <pattern id="pattern-hex" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M0 20 L20 0 L40 20 L20 40 Z" fill="currentColor" className="text-primary"></path>
+            </pattern>
+            <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-hex)"></rect>
+          </svg>
+        </div>
+
+        <div className="relative z-10 container mx-auto px-4">
+          <span className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block animate-bounce">We're here for you</span>
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 tracking-tight">Get in Touch</h1>
+          <p className="text-xl text-gray-500 max-w-2xl mx-auto font-light leading-relaxed">
+            Have a question about a tour? Want to customize your trip?
+            <br className="hidden md:block" /> We'd love to hear from you.
+          </p>
+        </div>
       </div>
 
-      <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12">
+      <div className="container mx-auto px-4 py-20">
+        <div className="grid lg:grid-cols-2 gap-20">
 
-        {/* Left Side: Contact Info */}
-        <div className="space-y-8">
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 transform hover:-translate-y-1 transition duration-300">
-            <h3 className="text-2xl font-bold mb-6 text-primary flex items-center gap-2">
-              <FaMapMarkerAlt /> Visit Us
-            </h3>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              Radheshyam Complex, Madhav Darshan,<br />
-              Bhavnagar, Gujarat, India - 364001
-            </p>
-          </div>
+          {/* Left Side: Info & Map */}
+          <div className="space-y-12">
 
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 transform hover:-translate-y-1 transition duration-300">
-            <h3 className="text-2xl font-bold mb-6 text-primary flex items-center gap-2">
-              <FaEnvelope /> Email & Phone
-            </h3>
-            <p className="text-gray-600 text-lg mb-2">
-              <span className="font-bold">Support:</span> hemalvaishnav
-            </p>
-            <p className="text-gray-600 text-lg">
-              <span className="font-bold">Call Us:</span> +91 99791 20728
-            </p>
-          </div>
-
-          {/* Suggestion Box Highlight */}
-          <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-            <h4 className="text-xl font-bold text-blue-800 flex items-center gap-2 mb-2">
-              <FaLightbulb className="text-yellow-500" /> Got a Suggestion?
-            </h4>
-            <p className="text-blue-700">
-              Select "Suggestion" in the form. We reward the best ideas with discount coupons!
-            </p>
-          </div>
-
-          {/* Google Map */}
-          <div className="bg-white p-2 rounded-2xl shadow-lg border border-gray-100 h-80 overflow-hidden">
-            <iframe
-              title="Office Location"
-              src="https://maps.google.com/maps?q=Radheshyam+Complex,+Madhav+Darshan,+Bhavnagar,+Gujarat,+India&t=&z=15&ie=UTF8&iwloc=&output=embed"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
-          </div>
-        </div>
-
-        {/* Right Side: The Form */}
-        <div className="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* Name & Phone Row */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Your Name</label>
-                <input
-                  type="text" name="name" required placeholder="John Doe"
-                  value={formData.name} onChange={handleChange}
-                  className="w-full border-gray-200 bg-gray-50 border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition outline-none"
-                />
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="p-8 bg-gray-50 rounded-3xl hover:bg-white hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                  <FaMapMarkerAlt size={20} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Visit Us</h3>
+                <p className="text-gray-500 leading-relaxed text-sm">
+                  Radheshyam Complex, Madhav Darshan,<br />
+                  Bhavnagar, Gujarat, India - 364001
+                </p>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
-                <input
-                  type="tel" name="phone" placeholder="+91 99999 88888"
-                  value={formData.phone} onChange={handleChange}
-                  className="w-full border-gray-200 bg-gray-50 border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition outline-none"
-                />
+
+              <div className="p-8 bg-gray-50 rounded-3xl hover:bg-white hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                  <FaEnvelope size={20} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Contact Info</h3>
+                <p className="text-gray-500 text-sm mb-1">
+                  <span className="font-semibold text-gray-700">Support:</span> hemalvaishnav@gmail.com
+                </p>
+                <p className="text-gray-500 text-sm">
+                  <span className="font-semibold text-gray-700">Phone:</span> +91 99791 20728
+                </p>
               </div>
             </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
-              <input
-                type="email" name="email" required placeholder="john@example.com"
-                value={formData.email} onChange={handleChange}
-                className="w-full border-gray-200 bg-gray-50 border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition outline-none"
-              />
+            {/* Google Map */}
+            <div className="bg-gray-200 rounded-[2rem] overflow-hidden h-96 shadow-inner relative group">
+              <iframe
+                title="Office Location"
+                src="https://maps.google.com/maps?q=Radheshyam+Complex,+Madhav+Darshan,+Bhavnagar,+Gujarat,+India&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0, filter: "grayscale(100%) contrast(1.2) opacity(0.8)" }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="transition-all duration-700 group-hover:filter-none group-hover:opacity-100"
+              ></iframe>
+              <div className="absolute inset-0 bg-primary/10 pointer-events-none group-hover:opacity-0 transition-opacity duration-500"></div>
             </div>
 
-            {/* Category Selector (The Suggestions Thing) */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">What is this about?</label>
-              <div className="relative">
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="w-full border-gray-200 bg-gray-50 border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition outline-none appearance-none cursor-pointer"
-                >
-                  <option value="General Inquiry">General Inquiry</option>
-                  <option value="Tour Customization">I want to customize a Tour</option>
-                  <option value="Suggestion">I have a Suggestion / Feedback</option>
-                  <option value="Complaint">Complaint</option>
-                  <option value="Other">Other</option>
-                </select>
-                {/* Arrow Icon */}
-                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-500">
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+            {/* Suggestion Box Highlight */}
+            <div className="bg-purple-50 p-8 rounded-3xl border border-purple-100 flex items-start gap-4">
+              <FaLightbulb className="text-yellow-500 text-2xl flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="text-lg font-bold text-purple-900 mb-2">Got a Suggestion?</h4>
+                <p className="text-purple-700 text-sm leading-relaxed">
+                  Select "Suggestion" in the form. We reward the best ideas with discount coupons!
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Side: The Form */}
+          <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-gray-100 relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none"></div>
+
+            <h3 className="text-3xl font-bold text-gray-900 mb-8">Send a Message</h3>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+
+              {/* Name & Phone Row */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Your Name</label>
+                  <input
+                    type="text" name="name" required placeholder="John Doe"
+                    value={formData.name} onChange={handleChange}
+                    className="w-full bg-gray-50 border border-gray-200 px-5 py-4 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white focus:border-transparent transition-all outline-none font-medium text-gray-800 placeholder-gray-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Phone Number</label>
+                  <input
+                    type="tel" name="phone" placeholder="+91 99999 88888"
+                    value={formData.phone} onChange={handleChange}
+                    className="w-full bg-gray-50 border border-gray-200 px-5 py-4 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white focus:border-transparent transition-all outline-none font-medium text-gray-800 placeholder-gray-400"
+                  />
                 </div>
               </div>
-            </div>
 
-            {/* Message Area */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                {formData.category === 'Suggestion' ? 'Tell us your idea!' : 'How can we help you?'}
-              </label>
-              <textarea
-                name="message" required rows="5"
-                placeholder={formData.category === 'Suggestion' ? "We should add a night trek to the Manali package..." : "I'm interested in the Bali package..."}
-                value={formData.message} onChange={handleChange}
-                className="w-full border-gray-200 bg-gray-50 border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition outline-none resize-none"
-              ></textarea>
-            </div>
+              {/* Email */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+                <input
+                  type="email" name="email" required placeholder="john@example.com"
+                  value={formData.email} onChange={handleChange}
+                  className="w-full bg-gray-50 border border-gray-200 px-5 py-4 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white focus:border-transparent transition-all outline-none font-medium text-gray-800 placeholder-gray-400"
+                />
+              </div>
 
-            <button
-              type="submit" disabled={loading}
-              className="w-full bg-secondary hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg transform hover:-translate-y-1 transition duration-300 flex items-center justify-center gap-2"
-            >
-              {loading ? 'Sending...' : <><FaPaperPlane /> Send Message</>}
-            </button>
-          </form>
+              {/* Category Selector */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Topic</label>
+                <div className="relative">
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="w-full bg-gray-50 border border-gray-200 px-5 py-4 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white focus:border-transparent transition-all outline-none font-medium text-gray-800 appearance-none cursor-pointer"
+                  >
+                    <option value="General Inquiry">General Inquiry</option>
+                    <option value="Tour Customization">I want to customize a Tour</option>
+                    <option value="Suggestion">I have a Suggestion / Feedback</option>
+                    <option value="Complaint">Complaint</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none text-gray-500">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Message Area */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Message</label>
+                <textarea
+                  name="message" required rows="5"
+                  placeholder={formData.category === 'Suggestion' ? "Tell us your brilliant idea..." : "How can we help you?"}
+                  value={formData.message} onChange={handleChange}
+                  className="w-full bg-gray-50 border border-gray-200 px-5 py-4 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white focus:border-transparent transition-all outline-none resize-none font-medium text-gray-800 placeholder-gray-400"
+                ></textarea>
+              </div>
+
+              <button
+                type="submit" disabled={loading}
+                className="w-full bg-primary hover:bg-purple-800 text-white font-bold py-5 rounded-xl shadow-xl hover:shadow-2xl hover:scale-[1.01] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {loading ? 'Sending...' : <><FaPaperPlane /> Send Message</>}
+              </button>
+            </form>
+          </div>
+
         </div>
-
       </div>
     </div>
   );

@@ -25,6 +25,9 @@ api.interceptors.request.use(
     const adminKey = localStorage.getItem('adminKey');
     if (adminKey) {
       config.headers['x-admin-key'] = adminKey;
+      console.log(`[API] Attaching Admin Key to ${config.url}`);
+    } else {
+      console.warn(`[API] No Admin Key found in localStorage for ${config.url}`);
     }
     return config;
   },

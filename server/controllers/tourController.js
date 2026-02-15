@@ -5,15 +5,15 @@ const Tour = require('../models/Tour');
 const getTours = async (req, res) => {
   try {
     const { search } = req.query;
-    
+
     // Build query object
     let query = {};
-    
+
     // If a search term exists, filter by Title OR Destination (case-insensitive)
     if (search) {
       query = {
         $or: [
-          { title: { $regex: search, $options: "i" } },       
+          { title: { $regex: search, $options: "i" } },
           { destination: { $regex: search, $options: "i" } }
         ]
       };
@@ -42,11 +42,15 @@ const getTourById = async (req, res) => {
 // @desc    Create a tour (Admin)
 // @route   POST /api/tours
 const createTour = async (req, res) => {
-  const tourData = req.body; 
+  const tourData = req.body;
+  console.log('[TourController] Creating Tour with data:', JSON.stringify(tourData, null, 2));
+
   try {
     const newTour = await Tour.create(tourData);
+    console.log('[TourController] Tour Created Success:', newTour._id);
     res.status(201).json(newTour);
   } catch (error) {
+    console.error('[TourController] Create Failed:', error.message);
     res.status(400).json({ message: error.message });
   }
 };
@@ -56,11 +60,11 @@ const createTour = async (req, res) => {
 const updateTour = async (req, res) => {
   try {
     const updatedTour = await Tour.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
+      req.params.id,
+      req.body,
       { new: true, runValidators: true }
     );
-    
+
     if (updatedTour) {
       res.json(updatedTour);
     } else {

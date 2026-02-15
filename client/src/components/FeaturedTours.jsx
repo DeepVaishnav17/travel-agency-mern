@@ -3,7 +3,7 @@ import TourCard from './TourCard';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-const FeaturedTours = ({ tours }) => {
+const FeaturedTours = ({ tours, title = "Popular Destinations", subtitle = "Our most loved tour packages" }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(3);
 
@@ -12,7 +12,8 @@ const FeaturedTours = ({ tours }) => {
         const handleResize = () => {
             if (window.innerWidth < 768) setItemsPerPage(1);
             else if (window.innerWidth < 1024) setItemsPerPage(2);
-            else setItemsPerPage(3);
+            else if (window.innerWidth < 1280) setItemsPerPage(3);
+            else setItemsPerPage(4); // Large screens get 4 items
         };
 
         // Set initial
@@ -45,8 +46,8 @@ const FeaturedTours = ({ tours }) => {
     return (
         <div className="container mx-auto px-4 py-16">
             <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-800">Popular Destinations</h2>
-                <p className="text-gray-500 mt-2">Our most loved tour packages</p>
+                <h2 className="text-3xl font-bold text-gray-800">{title}</h2>
+                <p className="text-gray-500 mt-2">{subtitle}</p>
             </div>
 
             {tours.length > 0 ? (
@@ -58,7 +59,7 @@ const FeaturedTours = ({ tours }) => {
                             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                         >
                             {Array.from({ length: totalPages }).map((_, pageIndex) => (
-                                <div key={pageIndex} className="min-w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-1">
+                                <div key={pageIndex} className="min-w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 px-1">
                                     {tours.slice(pageIndex * itemsPerPage, (pageIndex + 1) * itemsPerPage).map(tour => (
                                         <TourCard key={tour._id} tour={tour} />
                                     ))}

@@ -32,6 +32,9 @@ const tourSchema = new mongoose.Schema({
 
   isFeatured: { type: Boolean, default: false },
 
+  // ✅ NEW FIELD: Brochure (PDF)
+  brochure: { type: String, required: false },
+
   // ✅ NEW FIELD: ARCHIVE SUPPORT
   isArchived: { type: Boolean, default: false }
 }, { timestamps: true });

@@ -40,6 +40,7 @@ app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/config', require('./routes/configRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
+app.use('/api/gallery', require('./routes/galleryRoutes'));
 
 const PORT = process.env.PORT || 5000;
 

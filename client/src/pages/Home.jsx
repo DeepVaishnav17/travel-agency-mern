@@ -5,6 +5,7 @@ import FeaturedTours from '../components/FeaturedTours';
 import WhyChooseUs from '../components/WhyChooseUs';
 import Testimonials from '../components/Testimonials';
 import CTASection from '../components/CTASection';
+import HappyTravelers from '../components/HappyTravelers';
 
 const Home = () => {
   const [tours, setTours] = useState([]);
@@ -32,22 +33,36 @@ const Home = () => {
   const domesticTours = tours.filter(t => !t.category || t.category === 'Domestic');
   const internationalTours = tours.filter(t => t.category === 'International');
 
-  // Default Layout if config is not yet loaded or doesn't have it
+  // Featured Tours Logic
+  const featuredTours = tours.filter(t => t.isFeatured);
+  const toursToShow = featuredTours.length > 0 ? featuredTours : tours.slice(0, 6);
+
+  // Default Layout with Featured Section
   const defaultLayout = [
     { id: 'hero', label: 'Hero Section', isVisible: true, order: 1 },
-    { id: 'domestic', label: 'Domestic Tours', isVisible: true, order: 2 },
-    { id: 'international', label: 'International Tours', isVisible: true, order: 3 },
-    { id: 'whyChooseUs', label: 'Why Choose Us', isVisible: true, order: 4 },
-    { id: 'testimonials', label: 'Testimonials', isVisible: true, order: 5 },
-    { id: 'cta', label: 'Call to Action', isVisible: true, order: 6 }
+    { id: 'featured', label: 'Featured Tours', isVisible: false, order: 2 }, // Hidden by default
+    { id: 'domestic', label: 'Domestic Tours', isVisible: true, order: 3 },
+    { id: 'international', label: 'International Tours', isVisible: true, order: 4 },
+    { id: 'testimonials', label: 'Testimonials', isVisible: true, order: 5 }, // Moved up
+    { id: 'whyChooseUs', label: 'Why Choose Us', isVisible: true, order: 6 },
+    { id: 'happyTravelers', label: 'Happy Travelers', isVisible: true, order: 7 },
+    { id: 'cta', label: 'Call to Action', isVisible: true, order: 8 }
   ];
 
-  const layout = config?.homeLayout?.length > 0 ? config.homeLayout : defaultLayout;
-  const sortedLayout = [...layout].sort((a, b) => a.order - b.order);
+  let activeLayout = config?.homeLayout?.length > 0 ? config.homeLayout : defaultLayout;
+
+  // SAFETY MERGE: Ensure new sections (Domestic, International, Featured) appear even if config is old
+  const existingIds = new Set(activeLayout.map(item => item.id));
+  const missingSections = defaultLayout.filter(item => !existingIds.has(item.id));
+
+  if (missingSections.length > 0) {
+    // Append missing sections. We keep their default 'order' which might overlap, but they will render.
+    activeLayout = [...activeLayout, ...missingSections];
+  }
+
+  const sortedLayout = [...activeLayout].sort((a, b) => a.order - b.order);
 
   // Background colors for separation
-  // We can cycle through them or assign specific ones to specific components if preferred.
-  // "each section should be clearly separable"
   const getSectionStyle = (index) => {
     return index % 2 === 0 ? 'bg-white' : 'bg-gray-50'; // Alternating backgrounds
   };
@@ -63,8 +78,11 @@ const Home = () => {
 
     switch (section.id) {
       case 'hero':
-        // Hero usually doesn't need extra padding or bg container as it has its own
         return <div key={section.id} className="bg-white"><HeroSection /></div>;
+      case 'featured':
+        // Only show if we have tours
+        if (toursToShow.length === 0) return null;
+        return <Wrapper key={section.id}><FeaturedTours tours={toursToShow} title="Featured Tours" subtitle="Handpicked experiences just for you" /></Wrapper>;
       case 'domestic':
         return <Wrapper key={section.id}><FeaturedTours tours={domesticTours} title="Domestic Tours" subtitle="Explore the beauty of our country" /></Wrapper>;
       case 'international':
@@ -75,6 +93,8 @@ const Home = () => {
         return <Wrapper key={section.id}><Testimonials /></Wrapper>;
       case 'cta':
         return <Wrapper key={section.id}><CTASection /></Wrapper>;
+      case 'happyTravelers':
+        return <Wrapper key={section.id}><HappyTravelers /></Wrapper>;
       default:
         return null;
     }

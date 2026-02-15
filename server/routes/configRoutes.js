@@ -5,4 +5,8 @@ const router = express.Router();
 
 router.route('/').get(getSiteConfig).put(checkAdminKey, updateSiteConfig);
 
+router.post('/verify', checkAdminKey, (req, res) => {
+    res.status(200).json({ success: true, message: "Valid Key" });
+});
+
 module.exports = router;

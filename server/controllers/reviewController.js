@@ -5,6 +5,7 @@ const createReview = async (req, res) => {
   try {
     const { name, rating, comment } = req.body;
 
+    console.log('[Review] Create Request:', req.body);
 
     const newReview = await Review.create({
       name: name || 'Anonymous',
@@ -12,9 +13,11 @@ const createReview = async (req, res) => {
       comment
     });
 
+    console.log('[Review] Created:', newReview._id);
     res.status(201).json(newReview);
   } catch (error) {
-    res.status(400).json({ message: 'Failed to submit review' });
+    console.error('[Review] Error:', error.message);
+    res.status(400).json({ message: 'Failed to submit review', error: error.message });
   }
 };
 

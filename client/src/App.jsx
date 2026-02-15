@@ -11,8 +11,10 @@ import AdminDashboard from './pages/AdminDashboard';
 import About from './pages/About';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
+import Gallery from './pages/Gallery';
 import TermsConditions from './pages/TermsConditions';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import TourDetails from './pages/TourDetails';
 
 function App() {
   return (
@@ -25,10 +27,11 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/tours" element={<Tours />} />
+            <Route path="/tours/:id" element={<TourDetails />} />
+            <Route path="/gallery" element={<Gallery />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />
-            {/* ✅ ADD THESE TWO NEW ROUTES */}
 
             {/* We will protect this route later */}
             <Route path="/admin" element={<AdminDashboard />} />

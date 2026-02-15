@@ -1,29 +1,26 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const HeroSection = () => {
     // --- HERO SLIDER CONFIGURATION ---
     const heroImages = [
         {
             image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop',
-            title: 'Explore the World',
-            subtitle: 'Unforgettable journeys await you.'
+            title: 'Explore the Unseen',
+            subtitle: 'Curated journeys for the modern wanderer.'
         },
         {
             image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop', // Paris
             title: 'Romance in Paris',
-            subtitle: 'Discover the city of love and lights.'
+            subtitle: 'Experience the city of lights like never before.'
         },
         {
             image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=1966&auto=format&fit=crop', // Venice
             title: 'Venetian Dreams',
-            subtitle: 'Experience the magic of the canals.'
+            subtitle: 'Get lost in the magic of the canals.'
         },
-        {
-            image: '/image2.png', // Santorini
-            title: 'Santorini Sunsets',
-            subtitle: 'Breathtaking views of the Aegean Sea.',
-            hideContent: true
-        }
+
     ];
 
     const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
@@ -32,44 +29,82 @@ const HeroSection = () => {
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentHeroSlide((prev) => (prev + 1) % heroImages.length);
-        }, 5000);
+        }, 6000);
         return () => clearInterval(timer);
     }, []);
 
     return (
-        <div className="relative h-[80vh] w-full overflow-hidden mb-12">
-            {heroImages.map((slide, index) => (
-                <div
-                    key={index}
-                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentHeroSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+        <div className="relative h-[85vh] w-full overflow-hidden bg-gray-900">
+            <AnimatePresence mode='wait'>
+                <motion.div
+                    key={currentHeroSlide}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.5 }}
+                    className="absolute inset-0"
                 >
                     {/* Image */}
-                    {!slide.hideContent && <div className="absolute inset-0 bg-black/40 z-10"></div>}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/60 z-10"></div>
                     <img
-                        src={slide.image}
-                        alt={slide.title}
-                        className="w-full h-full object-cover absolute inset-0"
-                        fetchPriority={index === 0 ? "high" : "low"}
-                        loading={index === 0 ? "eager" : "lazy"}
+                        src={heroImages[currentHeroSlide].image}
+                        alt={heroImages[currentHeroSlide].title}
+                        className="w-full h-full object-cover"
                     />
 
                     {/* Content */}
-                    {!slide.hideContent && (
-                        <div className="relative z-20 flex flex-col items-center justify-center h-full text-center text-white px-4">
-                            <h1 className="text-5xl md:text-7xl font-bold mb-4 drop-shadow-lg transform transition duration-700 translate-y-0">{slide.title}</h1>
-                            <p className="text-xl md:text-2xl mb-8 max-w-2xl font-light">{slide.subtitle}</p>
+                    {!heroImages[currentHeroSlide].hideContent && (
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center text-white px-4">
+                            <motion.span
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5, duration: 0.8 }}
+                                className="uppercase tracking-[0.3em] text-sm md:text-base mb-4 text-purple-200"
+                            >
+                                Premium Travel Agency
+                            </motion.span>
+                            <motion.h1
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3, duration: 0.8 }}
+                                className="text-5xl md:text-8xl font-bold mb-6 tracking-tight"
+                            >
+                                {heroImages[currentHeroSlide].title}
+                            </motion.h1>
+                            <motion.p
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5, duration: 0.8 }}
+                                className="text-lg md:text-2xl mb-10 max-w-2xl font-light text-gray-200"
+                            >
+                                {heroImages[currentHeroSlide].subtitle}
+                            </motion.p>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.7, duration: 0.8 }}
+                                className="flex gap-4"
+                            >
+                                <Link to="/tours" className="px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-purple-700 transition-all shadow-lg hover:shadow-purple-500/30 transform hover:-translate-y-1">
+                                    Explore Tours
+                                </Link>
+                                <Link to="/contact" className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-bold hover:bg-white hover:text-primary transition-all shadow-lg transform hover:-translate-y-1">
+                                    Plan My Trip
+                                </Link>
+                            </motion.div>
                         </div>
                     )}
-                </div>
-            ))}
+                </motion.div>
+            </AnimatePresence>
 
             {/* Hero Dots */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex gap-2">
+            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-30 flex gap-3">
                 {heroImages.map((_, idx) => (
                     <button
                         key={idx}
                         onClick={() => setCurrentHeroSlide(idx)}
-                        className={`h-3 w-3 rounded-full transition-all duration-300 ${currentHeroSlide === idx ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/80'}`}
+                        className={`h-2 rounded-full transition-all duration-300 ${currentHeroSlide === idx ? 'bg-white w-8' : 'bg-white/30 w-2 hover:bg-white/60'}`}
                     />
                 ))}
             </div>
